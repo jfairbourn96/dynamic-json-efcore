@@ -13,7 +13,6 @@ public class Employee
     public string? Department { get; set; }
     public Guid EmployeeTypeId { get; set; }
     public EmployeeType? EmployeeType { get; set; }
-    public string FieldValuesJson { get; set; } = "{}";
     public DateTime CreatedDate { get; set; }
     public DateTime UpdatedDate { get; set; }
 

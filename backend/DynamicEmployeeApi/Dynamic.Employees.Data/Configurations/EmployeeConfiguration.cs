@@ -29,10 +29,6 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
         builder.Property(e => e.Department)
             .HasMaxLength(100);
 
-        builder.Property(e => e.FieldValuesJson)
-            .HasColumnType("nvarchar(max)")
-            .HasDefaultValue("{}");
-
         builder.HasOne(e => e.EmployeeType)
             .WithMany()
             .HasForeignKey(e => e.EmployeeTypeId)

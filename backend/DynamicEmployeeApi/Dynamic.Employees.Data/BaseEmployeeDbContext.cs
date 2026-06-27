@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dynamic.Employees.Data;
 
-public class DynamicEmployeeDbContext(DbContextOptions<DynamicEmployeeDbContext> options) : DbContext(options)
+public abstract class BaseEmployeeDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<EmployeeTypeField> EmployeeTypeFields => Set<EmployeeTypeField>();
     public DbSet<EmployeeType> EmployeeTypes => Set<EmployeeType>();
@@ -11,6 +11,6 @@ public class DynamicEmployeeDbContext(DbContextOptions<DynamicEmployeeDbContext>
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(DynamicEmployeeDbContext).Assembly);
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(BaseEmployeeDbContext).Assembly);
     }
 }

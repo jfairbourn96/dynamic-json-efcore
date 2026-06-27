@@ -16,10 +16,5 @@ public class EmployeeTypeConfiguration : IEntityTypeConfiguration<EmployeeType>
 
         builder.Property(e => e.Description)
             .HasMaxLength(500);
-
-        builder.HasMany(e => e.Fields)
-            .WithOne()
-            .HasForeignKey(f => f.EmployeeTypeId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

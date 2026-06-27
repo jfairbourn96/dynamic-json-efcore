@@ -18,5 +18,9 @@ public class EmployeeTypeFieldConfiguration : IEntityTypeConfiguration<EmployeeT
             .IsRequired()
             .HasMaxLength(200);
 
+        builder.HasOne(e => e.EmployeeType)
+            .WithMany(e => e.Fields)
+            .HasForeignKey(f => f.EmployeeTypeId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
