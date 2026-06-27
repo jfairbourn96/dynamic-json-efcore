@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dynamic.Employee.Core", "Dynamic.Employee.Core\Dynamic.Employee.Core.csproj", "{5DA5A5CE-FC0A-4BDB-AAE4-7AB039B7F637}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dynamic.Employee.Api", "Dynamic.Employee.Api\Dynamic.Employee.Api.csproj", "{4D801D82-7AC7-493D-80C4-82B19B533060}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmployeeApi", "EmployeeApi\EmployeeApi.csproj", "{38DD2A35-6BBF-42EF-A416-968AA70098A6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5DA5A5CE-FC0A-4BDB-AAE4-7AB039B7F637}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DA5A5CE-FC0A-4BDB-AAE4-7AB039B7F637}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DA5A5CE-FC0A-4BDB-AAE4-7AB039B7F637}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DA5A5CE-FC0A-4BDB-AAE4-7AB039B7F637}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D801D82-7AC7-493D-80C4-82B19B533060}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D801D82-7AC7-493D-80C4-82B19B533060}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D801D82-7AC7-493D-80C4-82B19B533060}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D801D82-7AC7-493D-80C4-82B19B533060}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38DD2A35-6BBF-42EF-A416-968AA70098A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38DD2A35-6BBF-42EF-A416-968AA70098A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38DD2A35-6BBF-42EF-A416-968AA70098A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38DD2A35-6BBF-42EF-A416-968AA70098A6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
