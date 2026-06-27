@@ -19,8 +19,4 @@
       <ProjectReference Include="..\Dynamic.Employees.Core\Dynamic.Employees.Core.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Configurations\" />
-    </ItemGroup>
-
 </Project>

@@ -19,6 +19,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Dynamic.Employees.Api\Dynamic.Employees.Api.csproj" />
       <ProjectReference Include="..\Dynamic.Employees.Core\Dynamic.Employees.Core.csproj" />
+      <ProjectReference Include="..\Dynamic.Employees.Data\Dynamic.Employees.Data.csproj" />
     </ItemGroup>
 
 </Project>
