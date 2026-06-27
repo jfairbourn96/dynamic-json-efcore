@@ -1,6 +1,6 @@
 using DynamicEmployee.Core.Enums;
 
-namespace DynamicEmployee.Core.Models;
+namespace Dynamic.Employees.Core.Models;
 
 public class EmployeeTypeField
 {

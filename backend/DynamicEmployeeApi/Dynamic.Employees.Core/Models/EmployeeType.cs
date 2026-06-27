@@ -1,4 +1,4 @@
-namespace DynamicEmployee.Core.Models;
+namespace Dynamic.Employees.Core.Models;
 
 public class EmployeeType
 {

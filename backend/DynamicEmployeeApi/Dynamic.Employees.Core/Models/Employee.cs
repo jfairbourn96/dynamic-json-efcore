@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace DynamicEmployee.Core.Models;
+namespace Dynamic.Employees.Core.Models;
 
 public class Employee
 {
