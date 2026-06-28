@@ -11,7 +11,6 @@ public static class JsonObjectPropertyBuilderExtensions
         this PropertyBuilder<JsonObject> builder)
     {
         builder
-            .HasColumnType("nvarchar(max)")
             .HasConversion(
                 v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
                 v => JsonSerializer.Deserialize<JsonObject>(v, (JsonSerializerOptions?)null) ?? new JsonObject(),
