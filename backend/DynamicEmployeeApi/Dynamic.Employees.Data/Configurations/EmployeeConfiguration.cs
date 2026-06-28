@@ -1,6 +1,6 @@
-using System.Text.Json;
-using System.Text.Json.Nodes;
 using Dynamic.Employees.Core.Models;
+using Dynamic.Json.EfCore;
+using Dynamic.Json.EfCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -43,9 +43,6 @@ public class EmployeeConfiguration : IEntityTypeConfiguration<Employee>
 
         builder.Property(e => e.FieldValues)
             .HasColumnName(FieldValuesColumnName)
-            .HasColumnType("nvarchar(max)")
-            .HasConversion(
-                fieldValues => JsonSerializer.Serialize(fieldValues, (JsonSerializerOptions?)null),
-                json => JsonSerializer.Deserialize<JsonObject>(json, (JsonSerializerOptions?)null) ?? new JsonObject());
+            .HasJsonConversion();
     }
 }
