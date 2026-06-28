@@ -1,3 +1,5 @@
+using Dynamic.Employees.Core.Interfaces;
+using Dynamic.Employees.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -15,6 +17,8 @@ public static class EmployeeDataExtensions
         // Allows controllers/services to inject BaseEmployeeDbContext directly.
         // Remove once the repository pattern is in place and nothing injects the DbContext directly.
         services.AddScoped<BaseEmployeeDbContext>(sp => sp.GetRequiredService<TContext>());
+
+        services.AddScoped<IEmployeeTypeRepository, EmployeeTypeRepository>();
 
         return services;
     }
