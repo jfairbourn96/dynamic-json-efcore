@@ -43,7 +43,7 @@ namespace EmployeeApi.Migrations
                     b.Property<Guid>("EmployeeTypeId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateOnly>("EndDate")
+                    b.Property<DateOnly?>("EndDate")
                         .HasColumnType("date");
 
                     b.Property<string>("FieldValues")
@@ -78,7 +78,7 @@ namespace EmployeeApi.Migrations
 
                     b.HasIndex("LastName");
 
-                    b.ToTable("Employee");
+                    b.ToTable("Employee", (string)null);
                 });
 
             modelBuilder.Entity("Dynamic.Employees.Core.Models.EmployeeType", b =>
@@ -104,42 +104,7 @@ namespace EmployeeApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EmployeeTypes");
-                });
-
-            modelBuilder.Entity("Dynamic.Employees.Core.Models.EmployeeTypeField", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<Guid>("EmployeeTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("FieldType")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<int>("Order")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Required")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EmployeeTypeId");
-
-                    b.ToTable("EmployeeTypeFields");
+                    b.ToTable("EmployeeType", (string)null);
                 });
 
             modelBuilder.Entity("Dynamic.Employees.Core.Models.Employee", b =>
@@ -153,19 +118,41 @@ namespace EmployeeApi.Migrations
                     b.Navigation("EmployeeType");
                 });
 
-            modelBuilder.Entity("Dynamic.Employees.Core.Models.EmployeeTypeField", b =>
-                {
-                    b.HasOne("Dynamic.Employees.Core.Models.EmployeeType", "EmployeeType")
-                        .WithMany("Fields")
-                        .HasForeignKey("EmployeeTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EmployeeType");
-                });
-
             modelBuilder.Entity("Dynamic.Employees.Core.Models.EmployeeType", b =>
                 {
+                    b.OwnsMany("Dynamic.Employees.Core.Models.EmployeeTypeField", "Fields", b1 =>
+                        {
+                            b1.Property<Guid>("EmployeeTypeId");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<string>("DisplayName")
+                                .IsRequired();
+
+                            b1.Property<int>("FieldType");
+
+                            b1.Property<Guid>("Id");
+
+                            b1.Property<string>("Name")
+                                .IsRequired();
+
+                            b1.Property<int>("Order");
+
+                            b1.Property<bool>("Required");
+
+                            b1.HasKey("EmployeeTypeId", "__synthesizedOrdinal");
+
+                            b1.ToTable("EmployeeType");
+
+                            b1
+                                .ToJson("Fields")
+                                .HasColumnType("nvarchar(max)");
+
+                            b1.WithOwner()
+                                .HasForeignKey("EmployeeTypeId");
+                        });
+
                     b.Navigation("Fields");
                 });
 #pragma warning restore 612, 618

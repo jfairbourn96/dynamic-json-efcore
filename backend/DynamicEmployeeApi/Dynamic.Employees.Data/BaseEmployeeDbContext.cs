@@ -5,7 +5,6 @@ namespace Dynamic.Employees.Data;
 
 public abstract class BaseEmployeeDbContext(DbContextOptions options) : DbContext(options)
 {
-    public DbSet<EmployeeTypeField> EmployeeTypeFields => Set<EmployeeTypeField>();
     public DbSet<EmployeeType> EmployeeTypes => Set<EmployeeType>();
     public DbSet<Employee> Employee => Set<Employee>();
 

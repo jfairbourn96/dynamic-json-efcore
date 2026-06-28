@@ -9,7 +9,7 @@ public class Employee
     public string LastName { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
     public DateOnly HireDate { get; set; }
-    public DateOnly EndDate { get; set; }
+    public DateOnly? EndDate { get; set; }
     public string? Department { get; set; }
     public Guid EmployeeTypeId { get; set; }
     public EmployeeType? EmployeeType { get; set; }
