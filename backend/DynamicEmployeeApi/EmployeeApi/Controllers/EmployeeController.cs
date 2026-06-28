@@ -64,4 +64,24 @@ public class EmployeeController : ControllerBase
 
         return Ok(employee);
     }
+
+    [HttpPatch("{id:guid}/field")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateField(Guid id, [FromBody] UpdateEmployeeFieldRequest request)
+    {
+        Employee? employee = await _db.Employee.FindAsync(id);
+
+        if (employee is null)
+        {
+            return NotFound();
+        }
+
+        employee.FieldValues[request.FieldName] = request.Value;
+        employee.UpdatedDate = DateTime.UtcNow;
+
+        await _db.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
