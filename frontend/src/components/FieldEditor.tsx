@@ -1,4 +1,4 @@
-import { FieldDefinition, FieldType, FieldOption } from '../types/schema';
+import type { FieldDefinition, FieldType, FieldOption } from '../types/schema';
 
 interface FieldEditorProps {
   field: Partial<FieldDefinition>;

@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(nvm version 2>&1)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(winget --version 2>&1)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\justin.fairbourn\\repos\\dynamic-hr-in-ef-core\\backend\\DynamicEmployeeApi\\EmployeeApi\\Controllers"
+    ]
+  }
+}

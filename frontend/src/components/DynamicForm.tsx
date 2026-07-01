@@ -1,4 +1,4 @@
-import { FieldDefinition, FieldType } from '../types/schema';
+import type { FieldDefinition, FieldType } from '../types/schema';
 import { cn } from '../lib/utils';
 
 interface DynamicFormProps {

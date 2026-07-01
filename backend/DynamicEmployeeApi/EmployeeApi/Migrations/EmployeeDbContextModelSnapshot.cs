@@ -143,7 +143,7 @@ namespace EmployeeApi.Migrations
 
                             b1.HasKey("EmployeeTypeId", "__synthesizedOrdinal");
 
-                            b1.ToTable("EmployeeType");
+                            b1.ToTable("EmployeeType", (string)null);
 
                             b1
                                 .ToJson("Fields")

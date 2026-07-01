@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { userTypesApi } from '../api/userTypes';
-import { usersApi } from '../api/users';
+import { employeeTypesApi } from '../api/employeeTypes';
+import { employeesApi } from '../api/employees';
 import { DynamicForm } from '../components/DynamicForm';
-import { CreateUserRequest } from '../types/records';
+import type { CreateEmployeeRequest } from '../types/records';
 
-const CORE_FIELDS: { name: keyof Omit<CreateUserRequest, 'userTypeId' | 'fieldValues'>; label: string; type: string; required: boolean }[] = [
+const CORE_FIELDS: { name: keyof Omit<CreateEmployeeRequest, 'employeeTypeId' | 'fieldValues'>; label: string; type: string; required: boolean }[] = [
   { name: 'firstName', label: 'First Name', type: 'text', required: true },
   { name: 'lastName', label: 'Last Name', type: 'text', required: true },
   { name: 'email', label: 'Email', type: 'email', required: true },
@@ -17,22 +17,22 @@ const CORE_FIELDS: { name: keyof Omit<CreateUserRequest, 'userTypeId' | 'fieldVa
 const inputClass =
   'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500';
 
-export function AddUserPage() {
+export function AddEmployeePage() {
   const navigate = useNavigate();
   const [selectedTypeId, setSelectedTypeId] = useState('');
   const [coreValues, setCoreValues] = useState<Record<string, string>>({});
   const [dynamicValues, setDynamicValues] = useState<Record<string, unknown>>({});
 
-  const { data: userTypes = [] } = useQuery({
-    queryKey: ['user-types'],
-    queryFn: userTypesApi.getAll,
+  const { data: employeeTypes = [] } = useQuery({
+    queryKey: ['employee-types'],
+    queryFn: employeeTypesApi.getAll,
   });
 
-  const selectedType = userTypes.find((ut) => ut.id === selectedTypeId) || null;
+  const selectedType = employeeTypes.find((et) => et.id === selectedTypeId) || null;
 
   const createMutation = useMutation({
-    mutationFn: (req: CreateUserRequest) => usersApi.create(req),
-    onSuccess: (user) => navigate(`/users/${user.id}`),
+    mutationFn: (req: CreateEmployeeRequest) => employeesApi.create(req),
+    onSuccess: (employee) => navigate(`/employees/${employee.id}`),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -46,19 +46,19 @@ export function AddUserPage() {
       email: coreValues.email || '',
       hireDate: coreValues.hireDate || '',
       department: coreValues.department || '',
-      userTypeId: selectedTypeId,
+      employeeTypeId: selectedTypeId,
       fieldValues: dynamicValues,
     });
   };
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Add User</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Add Employee</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700">
-            User Type <span className="text-red-500">*</span>
+            Employee Type <span className="text-red-500">*</span>
           </label>
           <select
             className={inputClass}
@@ -69,10 +69,10 @@ export function AddUserPage() {
             }}
             required
           >
-            <option value="">Select a user type...</option>
-            {userTypes.map((ut) => (
-              <option key={ut.id} value={ut.id}>
-                {ut.name}
+            <option value="">Select an employee type...</option>
+            {employeeTypes.map((et) => (
+              <option key={et.id} value={et.id}>
+                {et.name}
               </option>
             ))}
           </select>
@@ -122,7 +122,7 @@ export function AddUserPage() {
             disabled={createMutation.isPending || !selectedTypeId}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {createMutation.isPending ? 'Saving...' : 'Add User'}
+            {createMutation.isPending ? 'Saving...' : 'Add Employee'}
           </button>
           <button
             type="button"

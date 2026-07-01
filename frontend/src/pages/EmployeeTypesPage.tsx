@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { UserType, FieldDefinition, CreateUserTypeRequest } from '../types/schema';
-import { userTypesApi } from '../api/userTypes';
+import type { EmployeeType, FieldDefinition, CreateEmployeeTypeRequest } from '../types/schema';
+import { employeeTypesApi } from '../api/employeeTypes';
 import { FieldEditor } from '../components/FieldEditor';
 
 type Mode = 'list' | 'create' | 'edit';
@@ -19,7 +19,7 @@ function buildRequest(
   name: string,
   description: string,
   fields: Partial<FieldDefinition>[],
-): CreateUserTypeRequest {
+): CreateEmployeeTypeRequest {
   return {
     name,
     description: description || undefined,
@@ -34,39 +34,39 @@ function buildRequest(
   };
 }
 
-export function UserTypesPage() {
+export function EmployeeTypesPage() {
   const qc = useQueryClient();
   const [mode, setMode] = useState<Mode>('list');
-  const [selected, setSelected] = useState<UserType | null>(null);
+  const [selected, setSelected] = useState<EmployeeType | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [fields, setFields] = useState<Partial<FieldDefinition>[]>([]);
 
-  const { data: userTypes = [], isLoading } = useQuery({
-    queryKey: ['user-types'],
-    queryFn: userTypesApi.getAll,
+  const { data: employeeTypes = [], isLoading } = useQuery({
+    queryKey: ['employee-types'],
+    queryFn: employeeTypesApi.getAll,
   });
 
   const createMutation = useMutation({
-    mutationFn: (req: CreateUserTypeRequest) => userTypesApi.create(req),
+    mutationFn: (req: CreateEmployeeTypeRequest) => employeeTypesApi.create(req),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['user-types'] });
+      qc.invalidateQueries({ queryKey: ['employee-types'] });
       resetToList();
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, req }: { id: string; req: CreateUserTypeRequest }) =>
-      userTypesApi.update(id, { id, ...req }),
+    mutationFn: ({ id, req }: { id: string; req: CreateEmployeeTypeRequest }) =>
+      employeeTypesApi.update(id, { id, ...req }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['user-types'] });
+      qc.invalidateQueries({ queryKey: ['employee-types'] });
       resetToList();
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: userTypesApi.delete,
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['user-types'] }),
+    mutationFn: employeeTypesApi.delete,
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['employee-types'] }),
   });
 
   const resetToList = () => {
@@ -85,11 +85,11 @@ export function UserTypesPage() {
     setMode('create');
   };
 
-  const openEdit = (ut: UserType) => {
-    setSelected(ut);
-    setName(ut.name);
-    setDescription(ut.description || '');
-    setFields(ut.fields.map((f) => ({ ...f })));
+  const openEdit = (et: EmployeeType) => {
+    setSelected(et);
+    setName(et.name);
+    setDescription(et.description || '');
+    setFields(et.fields.map((f) => ({ ...f })));
     setMode('edit');
   };
 
@@ -118,49 +118,49 @@ export function UserTypesPage() {
     return (
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">User Types</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Employee Types</h1>
           <button
             onClick={openCreate}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
           >
-            + New User Type
+            + New Employee Type
           </button>
         </div>
 
         {isLoading && <p className="text-gray-500">Loading...</p>}
 
-        {!isLoading && userTypes.length === 0 && (
+        {!isLoading && employeeTypes.length === 0 && (
           <div className="rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-            <p className="text-gray-500">No user types yet. Create one to get started.</p>
+            <p className="text-gray-500">No employee types yet. Create one to get started.</p>
           </div>
         )}
 
         <div className="space-y-3">
-          {userTypes.map((ut) => (
+          {employeeTypes.map((et) => (
             <div
-              key={ut.id}
+              key={et.id}
               className="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4 shadow-sm"
             >
               <div>
-                <p className="font-medium text-gray-900">{ut.name}</p>
-                {ut.description && (
-                  <p className="text-sm text-gray-500">{ut.description}</p>
+                <p className="font-medium text-gray-900">{et.name}</p>
+                {et.description && (
+                  <p className="text-sm text-gray-500">{et.description}</p>
                 )}
                 <p className="text-xs text-gray-400 mt-1">
-                  {ut.fields.length} field{ut.fields.length !== 1 ? 's' : ''}
+                  {et.fields.length} field{et.fields.length !== 1 ? 's' : ''}
                 </p>
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => openEdit(ut)}
+                  onClick={() => openEdit(et)}
                   className="rounded border border-gray-300 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
                 >
                   Edit
                 </button>
                 <button
                   onClick={() => {
-                    if (confirm(`Delete "${ut.name}"?`)) {
-                      deleteMutation.mutate(ut.id);
+                    if (confirm(`Delete "${et.name}"?`)) {
+                      deleteMutation.mutate(et.id);
                     }
                   }}
                   className="rounded border border-red-300 px-3 py-1.5 text-sm text-red-600 hover:bg-red-50"
@@ -179,10 +179,10 @@ export function UserTypesPage() {
     <div>
       <div className="flex items-center gap-3 mb-6">
         <button onClick={resetToList} className="text-sm text-blue-600 hover:underline">
-          ← User Types
+          ← Employee Types
         </button>
         <h1 className="text-2xl font-bold text-gray-900">
-          {mode === 'create' ? 'New User Type' : `Edit: ${selected?.name}`}
+          {mode === 'create' ? 'New Employee Type' : `Edit: ${selected?.name}`}
         </h1>
       </div>
 
@@ -241,7 +241,7 @@ export function UserTypesPage() {
             disabled={createMutation.isPending || updateMutation.isPending}
             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            {mode === 'create' ? 'Create User Type' : 'Save Changes'}
+            {mode === 'create' ? 'Create Employee Type' : 'Save Changes'}
           </button>
           <button
             type="button"

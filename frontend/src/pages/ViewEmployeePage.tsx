@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { usersApi } from '../api/users';
+import { employeesApi } from '../api/employees';
 import { DynamicForm } from '../components/DynamicForm';
 
 const CORE_FIELDS: { key: string; label: string }[] = [
@@ -14,13 +14,13 @@ const CORE_FIELDS: { key: string; label: string }[] = [
 const inputClass =
   'mt-1 block w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 cursor-default';
 
-export function ViewUserPage() {
+export function ViewEmployeePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data: user, isLoading, isError } = useQuery({
-    queryKey: ['users', id],
-    queryFn: () => usersApi.getById(id!),
+  const { data: employee, isLoading, isError } = useQuery({
+    queryKey: ['employees', id],
+    queryFn: () => employeesApi.getById(id!),
     enabled: !!id,
   });
 
@@ -28,10 +28,10 @@ export function ViewUserPage() {
     return <p className="text-gray-500">Loading...</p>;
   }
 
-  if (isError || !user) {
+  if (isError || !employee) {
     return (
       <div>
-        <p className="text-red-600">Failed to load user record.</p>
+        <p className="text-red-600">Failed to load employee record.</p>
         <button onClick={() => navigate(-1)} className="mt-2 text-sm text-blue-600 hover:underline">
           ← Back
         </button>
@@ -39,7 +39,7 @@ export function ViewUserPage() {
     );
   }
 
-  const userType = user.userType;
+  const employeeType = employee.employeeType;
 
   return (
     <div className="max-w-2xl">
@@ -47,15 +47,15 @@ export function ViewUserPage() {
         <button onClick={() => navigate(-1)} className="text-sm text-blue-600 hover:underline">
           ← Back to results
         </button>
-        {userType && (
+        {employeeType && (
           <span className="rounded-full bg-blue-100 px-3 py-0.5 text-xs font-medium text-blue-700">
-            {userType.name}
+            {employeeType.name}
           </span>
         )}
       </div>
 
       <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        {user.firstName} {user.lastName}
+        {employee.firstName} {employee.lastName}
       </h1>
 
       <div className="space-y-6">
@@ -67,20 +67,20 @@ export function ViewUserPage() {
             <div key={field.key}>
               <label className="block text-sm font-medium text-gray-700">{field.label}</label>
               <div className={inputClass}>
-                {(user as unknown as Record<string, string>)[field.key] || '—'}
+                {(employee as unknown as Record<string, string>)[field.key] || '—'}
               </div>
             </div>
           ))}
         </div>
 
-        {userType && userType.fields.length > 0 && (
+        {employeeType && employeeType.fields.length > 0 && (
           <div className="rounded-lg border border-gray-200 p-4">
             <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-4">
-              {userType.name} Fields
+              {employeeType.name} Fields
             </h2>
             <DynamicForm
-              fields={userType.fields}
-              values={user.fieldValues}
+              fields={employeeType.fields}
+              values={employee.fieldValues}
               onChange={() => undefined}
               disabled
             />
@@ -88,8 +88,8 @@ export function ViewUserPage() {
         )}
 
         <p className="text-xs text-gray-400">
-          Created {new Date(user.createdAt).toLocaleDateString()} · Last updated{' '}
-          {new Date(user.updatedAt).toLocaleDateString()}
+          Created {new Date(employee.createdAt).toLocaleDateString()} · Last updated{' '}
+          {new Date(employee.updatedAt).toLocaleDateString()}
         </p>
       </div>
     </div>

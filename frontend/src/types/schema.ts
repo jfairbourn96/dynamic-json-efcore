@@ -15,7 +15,7 @@ export interface FieldDefinition {
   order: number;
 }
 
-export interface UserType {
+export interface EmployeeType {
   id: string;
   name: string;
   description?: string;
@@ -25,13 +25,13 @@ export interface UserType {
   updatedAt: string;
 }
 
-export interface CreateUserTypeRequest {
+export interface CreateEmployeeTypeRequest {
   name: string;
   description?: string;
   parentTypeId?: string | null;
   fields: Omit<FieldDefinition, 'id'>[];
 }
 
-export interface UpdateUserTypeRequest extends CreateUserTypeRequest {
+export interface UpdateEmployeeTypeRequest extends CreateEmployeeTypeRequest {
   id: string;
 }

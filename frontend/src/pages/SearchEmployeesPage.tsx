@@ -1,42 +1,42 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { userTypesApi } from '../api/userTypes';
-import { usersApi } from '../api/users';
+import { employeeTypesApi } from '../api/employeeTypes';
+import { employeesApi } from '../api/employees';
 import { DynamicSearch } from '../components/DynamicSearch';
-import { UserSearchFilters, User, PagedResult } from '../types/records';
-import { FieldDefinition } from '../types/schema';
+import type { EmployeeSearchFilters, Employee, PagedResult } from '../types/records';
+import type { FieldDefinition } from '../types/schema';
 
-export function SearchUsersPage() {
+export function SearchEmployeesPage() {
   const navigate = useNavigate();
   const [selectedTypeId, setSelectedTypeId] = useState('');
-  const [results, setResults] = useState<PagedResult<User> | null>(null);
+  const [results, setResults] = useState<PagedResult<Employee> | null>(null);
 
-  const { data: userTypes = [] } = useQuery({
-    queryKey: ['user-types'],
-    queryFn: userTypesApi.getAll,
+  const { data: employeeTypes = [] } = useQuery({
+    queryKey: ['employee-types'],
+    queryFn: employeeTypesApi.getAll,
   });
 
-  const selectedType = userTypes.find((ut) => ut.id === selectedTypeId) || null;
+  const selectedType = employeeTypes.find((et) => et.id === selectedTypeId) || null;
   const dynamicFields: FieldDefinition[] = selectedType ? selectedType.fields : [];
 
   const searchMutation = useMutation({
-    mutationFn: (filters: UserSearchFilters) =>
-      usersApi.search({ ...filters, userTypeId: selectedTypeId || undefined }),
+    mutationFn: (filters: EmployeeSearchFilters) =>
+      employeesApi.search({ ...filters, employeeTypeId: selectedTypeId || undefined }),
     onSuccess: (data) => setResults(data),
   });
 
-  const handleSearch = (filters: UserSearchFilters) => {
+  const handleSearch = (filters: EmployeeSearchFilters) => {
     searchMutation.mutate(filters);
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Search Users</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">Search Employees</h1>
 
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Filter by User Type
+          Filter by Employee Type
         </label>
         <select
           className="block w-64 rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
@@ -47,9 +47,9 @@ export function SearchUsersPage() {
           }}
         >
           <option value="">All types</option>
-          {userTypes.map((ut) => (
-            <option key={ut.id} value={ut.id}>
-              {ut.name}
+          {employeeTypes.map((et) => (
+            <option key={et.id} value={et.id}>
+              {et.name}
             </option>
           ))}
         </select>
@@ -75,14 +75,14 @@ export function SearchUsersPage() {
 
           {results.items.length === 0 ? (
             <div className="rounded-lg border-2 border-dashed border-gray-200 p-8 text-center">
-              <p className="text-gray-500">No users match your search.</p>
+              <p className="text-gray-500">No employees match your search.</p>
             </div>
           ) : (
             <div className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    {['Name', 'Email', 'Department', 'User Type', 'Hire Date', ''].map((h) => (
+                    {['Name', 'Email', 'Department', 'Employee Type', 'Hire Date', ''].map((h) => (
                       <th
                         key={h}
                         className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500"
@@ -93,20 +93,20 @@ export function SearchUsersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {results.items.map((user) => (
-                    <tr key={user.id} className="hover:bg-gray-50">
+                  {results.items.map((employee) => (
+                    <tr key={employee.id} className="hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                        {user.firstName} {user.lastName}
+                        {employee.firstName} {employee.lastName}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{user.email}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{user.department || '—'}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{employee.email}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{employee.department || '—'}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">
-                        {user.userType ? user.userType.name : '—'}
+                        {employee.employeeType ? employee.employeeType.name : '—'}
                       </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{user.hireDate}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{employee.hireDate}</td>
                       <td className="px-4 py-3 text-right">
                         <button
-                          onClick={() => navigate(`/users/${user.id}`)}
+                          onClick={() => navigate(`/employees/${employee.id}`)}
                           className="text-sm text-blue-600 hover:underline"
                         >
                           View

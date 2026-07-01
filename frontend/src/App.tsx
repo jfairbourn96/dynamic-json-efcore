@@ -2,15 +2,15 @@ import { BrowserRouter, Routes, Route, NavLink } from 'react-router-dom';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { queryClient } from './lib/queryClient';
-import { UserTypesPage } from './pages/UserTypesPage';
-import { AddUserPage } from './pages/AddUserPage';
-import { SearchUsersPage } from './pages/SearchUsersPage';
-import { ViewUserPage } from './pages/ViewUserPage';
+import { EmployeeTypesPage } from './pages/EmployeeTypesPage';
+import { AddEmployeePage } from './pages/AddEmployeePage';
+import { SearchEmployeesPage } from './pages/SearchEmployeesPage';
+import { ViewEmployeePage } from './pages/ViewEmployeePage';
 
 const NAV_LINKS = [
-  { to: '/user-types', label: 'User Types' },
-  { to: '/users/add', label: 'Add User' },
-  { to: '/users/search', label: 'Search Users' },
+  { to: '/employee-types', label: 'Employee Types' },
+  { to: '/employees/add', label: 'Add Employee' },
+  { to: '/employees/search', label: 'Search Employees' },
 ];
 
 function Layout({ children }: { children: React.ReactNode }) {
@@ -45,11 +45,11 @@ export default function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<UserTypesPage />} />
-            <Route path="/user-types" element={<UserTypesPage />} />
-            <Route path="/users/add" element={<AddUserPage />} />
-            <Route path="/users/search" element={<SearchUsersPage />} />
-            <Route path="/users/:id" element={<ViewUserPage />} />
+            <Route path="/" element={<EmployeeTypesPage />} />
+            <Route path="/employee-types" element={<EmployeeTypesPage />} />
+            <Route path="/employees/add" element={<AddEmployeePage />} />
+            <Route path="/employees/search" element={<SearchEmployeesPage />} />
+            <Route path="/employees/:id" element={<ViewEmployeePage />} />
           </Routes>
         </Layout>
       </BrowserRouter>

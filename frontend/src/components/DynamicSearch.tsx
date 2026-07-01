@@ -1,18 +1,18 @@
 import { useState } from 'react';
-import { FieldDefinition } from '../types/schema';
-import { UserSearchFilters } from '../types/records';
+import type { FieldDefinition } from '../types/schema';
+import type { EmployeeSearchFilters } from '../types/records';
 
 interface DynamicSearchProps {
   fields: FieldDefinition[];
-  onSearch: (filters: UserSearchFilters) => void;
+  onSearch: (filters: EmployeeSearchFilters) => void;
   isLoading?: boolean;
 }
 
 export function DynamicSearch({ fields, onSearch, isLoading = false }: DynamicSearchProps) {
-  const [coreFilters, setCoreFilters] = useState<Partial<UserSearchFilters>>({});
+  const [coreFilters, setCoreFilters] = useState<Partial<EmployeeSearchFilters>>({});
   const [dynamicFilters, setDynamicFilters] = useState<Record<string, unknown>>({});
 
-  const handleCoreChange = (name: keyof UserSearchFilters, value: string) => {
+  const handleCoreChange = (name: keyof EmployeeSearchFilters, value: string) => {
     setCoreFilters((prev) => ({ ...prev, [name]: value || undefined }));
   };
 

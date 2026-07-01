@@ -20,12 +20,17 @@ public interface IEmployeeTypeRepository
     /// <summary>
     /// Registers a new employee type for insertion on the next <see cref="SaveAsync"/> call.
     /// </summary>
-    void Add(EmployeeType employeeType);
+    public Task AddAsync(EmployeeType employeeType);
 
     /// <summary>
     /// Marks an existing employee type as modified so it is persisted on the next <see cref="SaveAsync"/> call.
     /// </summary>
-    void Update(EmployeeType employeeType);
+    public Task UpdateAsync(EmployeeType employeeType);
+
+    /// <summary>
+    /// Registers an employee type for removal on the next <see cref="SaveAsync"/> call.
+    /// </summary>
+    void Delete(EmployeeType employeeType);
 
     /// <summary>
     /// Persists all pending changes to the database.

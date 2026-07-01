@@ -5,32 +5,25 @@ using Microsoft.EntityFrameworkCore;
 namespace Dynamic.Employees.Data.Repositories;
 
 /// <inheritdoc/>
-public class EmployeeTypeRepository : IEmployeeTypeRepository
+public class EmployeeTypeRepository(BaseEmployeeDbContext context) : IEmployeeTypeRepository
 {
-    private readonly BaseEmployeeDbContext _context;
-
-    public EmployeeTypeRepository(BaseEmployeeDbContext context)
-    {
-        _context = context;
-    }
-
     /// <inheritdoc/>
-    public async Task<List<EmployeeType>> GetAllAsync()
-        => await _context.EmployeeTypes.ToListAsync();
+    public async Task<List<EmployeeType>> GetAllAsync() => await context.EmployeeTypes.ToListAsync();
 
     /// <inheritdoc/>
     public async Task<EmployeeType?> GetByIdAsync(Guid id)
-        => await _context.EmployeeTypes.FirstOrDefaultAsync(et => et.Id == id);
+        => await context.EmployeeTypes.FirstOrDefaultAsync(et => et.Id == id);
 
     /// <inheritdoc/>
-    public void Add(EmployeeType employeeType)
-        => _context.EmployeeTypes.Add(employeeType);
+    public async Task AddAsync(EmployeeType employeeType) => await context.EmployeeTypes.AddAsync(employeeType);
 
     /// <inheritdoc/>
-    public void Update(EmployeeType employeeType)
-        => _context.EmployeeTypes.Update(employeeType);
+    public async Task UpdateAsync(EmployeeType employeeType)
+        => await Task.FromResult(context.EmployeeTypes.Update(employeeType));
 
     /// <inheritdoc/>
-    public Task SaveAsync()
-        => _context.SaveChangesAsync();
+    public void Delete(EmployeeType employeeType) => context.EmployeeTypes.Remove(employeeType);
+
+    /// <inheritdoc/>
+    public Task SaveAsync() => context.SaveChangesAsync();
 }

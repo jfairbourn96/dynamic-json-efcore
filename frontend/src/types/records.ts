@@ -1,39 +1,39 @@
-import { UserType } from './schema';
+import type { EmployeeType } from './schema';
 
-export interface User {
+export interface Employee {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   hireDate: string;
   department: string;
-  userTypeId: string;
-  userType?: UserType;
+  employeeTypeId: string;
+  employeeType?: EmployeeType;
   fieldValues: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
 
-export interface CreateUserRequest {
+export interface CreateEmployeeRequest {
   firstName: string;
   lastName: string;
   email: string;
   hireDate: string;
   department: string;
-  userTypeId: string;
+  employeeTypeId: string;
   fieldValues: Record<string, unknown>;
 }
 
-export interface UpdateUserRequest extends CreateUserRequest {
+export interface UpdateEmployeeRequest extends CreateEmployeeRequest {
   id: string;
 }
 
-export interface UserSearchFilters {
+export interface EmployeeSearchFilters {
   firstName?: string;
   lastName?: string;
   email?: string;
   department?: string;
-  userTypeId?: string;
+  employeeTypeId?: string;
   fieldValues?: Record<string, unknown>;
 }
 
