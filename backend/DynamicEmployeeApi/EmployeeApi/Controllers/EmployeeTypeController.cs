@@ -1,7 +1,7 @@
-using Dynamic.Employees.Core.Interfaces;
 using Dynamic.Employees.Core.Models;
 using EmployeeApi.Requests;
 using EmployeeApi.Responses;
+using EmployeeApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EmployeeApi.Controllers;
@@ -13,11 +13,11 @@ namespace EmployeeApi.Controllers;
 [Route("api/employee-types")]
 public class EmployeeTypeController : ControllerBase
 {
-    private readonly IEmployeeTypeRepository _repo;
+    private readonly IEmployeeTypeService _service;
 
-    public EmployeeTypeController(IEmployeeTypeRepository repo)
+    public EmployeeTypeController(IEmployeeTypeService service)
     {
-        _repo = repo;
+        _service = service;
     }
 
     /// <summary>Returns all employee types.</summary>
@@ -26,7 +26,7 @@ public class EmployeeTypeController : ControllerBase
     [ProducesResponseType(typeof(List<EmployeeTypeResponse>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll()
     {
-        List<EmployeeType> types = await _repo.GetAllAsync();
+        List<EmployeeType> types = await _service.GetAllAsync();
         return Ok(types.Select(ToResponse).ToList());
     }
 
@@ -38,7 +38,7 @@ public class EmployeeTypeController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id)
     {
-        EmployeeType? type = await _repo.GetByIdAsync(id);
+        EmployeeType? type = await _service.GetByIdAsync(id);
 
         if (type is null)
         {
@@ -56,19 +56,7 @@ public class EmployeeTypeController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create([FromBody] CreateEmployeeTypeRequest request)
     {
-        EmployeeType type = new()
-        {
-            Id = Guid.NewGuid(),
-            Name = request.Name,
-            Description = request.Description,
-            Fields = request.Fields.Select(ToField).ToList(),
-            CreatedDate = DateTime.UtcNow,
-            UpdatedDate = DateTime.UtcNow,
-        };
-
-        await _repo.AddAsync(type);
-        await _repo.SaveAsync();
-
+        EmployeeType type = await _service.CreateAsync(request);
         return CreatedAtAction(nameof(GetById), new { id = type.Id }, ToResponse(type));
     }
 
@@ -81,20 +69,12 @@ public class EmployeeTypeController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, [FromBody] CreateEmployeeTypeRequest request)
     {
-        EmployeeType? type = await _repo.GetByIdAsync(id);
+        EmployeeType? type = await _service.UpdateAsync(id, request);
 
         if (type is null)
         {
             return NotFound();
         }
-
-        type.Name = request.Name;
-        type.Description = request.Description;
-        type.Fields = request.Fields.Select(ToField).ToList();
-        type.UpdatedDate = DateTime.UtcNow;
-
-        await _repo.UpdateAsync(type);
-        await _repo.SaveAsync();
 
         return Ok(ToResponse(type));
     }
@@ -107,29 +87,15 @@ public class EmployeeTypeController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id)
     {
-        EmployeeType? type = await _repo.GetByIdAsync(id);
+        bool deleted = await _service.DeleteAsync(id);
 
-        if (type is null)
+        if (!deleted)
         {
             return NotFound();
         }
 
-        _repo.Delete(type);
-        await _repo.SaveAsync();
-
         return NoContent();
     }
-
-    private static EmployeeTypeField ToField(CreateEmployeeTypeFieldRequest f) => new()
-    {
-        Id = Guid.NewGuid(),
-        Name = f.Name,
-        DisplayName = f.Label,
-        FieldType = f.FieldType,
-        Required = f.Required,
-        Options = f.Options.Select(o => new FieldOption { Label = o.Label, Value = o.Value }).ToList(),
-        Order = f.Order,
-    };
 
     private static EmployeeTypeResponse ToResponse(EmployeeType type) => new()
     {
@@ -146,7 +112,7 @@ public class EmployeeTypeController : ControllerBase
     {
         Id = field.Id.ToString(),
         Name = field.Name,
-        Label = field.DisplayName,
+        Label = field.Label,
         FieldType = field.FieldType,
         Required = field.Required,
         Options = field.Options.Select(o => new FieldOptionResponse { Label = o.Label, Value = o.Value }).ToList(),

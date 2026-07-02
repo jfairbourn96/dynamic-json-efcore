@@ -1,6 +1,7 @@
 using Dynamic.Employees.Data;
 using Dynamic.Employees.Data.Extensions;
 using EmployeeApi;
+using EmployeeApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -9,6 +10,9 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
 builder.Services.RegisterEmployeeDataServices<EmployeeDbContext>(connectionString);
+
+// Register application services
+builder.Services.AddScoped<IEmployeeTypeService, EmployeeTypeService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

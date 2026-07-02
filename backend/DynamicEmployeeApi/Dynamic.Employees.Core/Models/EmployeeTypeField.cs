@@ -7,7 +7,7 @@ public class EmployeeTypeField
 {
     public Guid Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string DisplayName { get; set; } = string.Empty;
+    public string Label { get; set; } = string.Empty;
     public FieldType FieldType { get; set; }
     public bool Required { get; set; }
     [NotMapped]
