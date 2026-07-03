@@ -1,3 +1,4 @@
+import { Plus, Trash2, X } from 'lucide-react';
 import type { FieldDefinition, FieldType, FieldOption } from '../types/schema';
 
 interface FieldEditorProps {
@@ -19,19 +20,37 @@ const inputClass =
   'block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500';
 
 export function FieldEditor({ field, index, onChange, onRemove }: FieldEditorProps) {
-  const handleOptionsChange = (raw: string) => {
-    const options: FieldOption[] = raw
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => {
-        const [value, label] = line.split(':').map((s) => s.trim());
-        return { value: value || '', label: label || value };
-      });
-    onChange(index, { options });
+  const options = field.options?.length ? field.options : [{ value: '', label: '' }];
+
+  const handleTypeChange = (fieldType: FieldType) => {
+    onChange(index, {
+      fieldType,
+      options: fieldType === 'select' ? options : [],
+    });
   };
 
-  const optionsText = (field.options || []).map((o) => `${o.value}: ${o.label}`).join('\n');
+  const handleOptionChange = (
+    optionIndex: number,
+    key: keyof FieldOption,
+    value: string,
+  ) => {
+    const updatedOptions = options.map((option, i) =>
+      i === optionIndex ? { ...option, [key]: value } : option,
+    );
+
+    onChange(index, { options: updatedOptions });
+  };
+
+  const handleOptionAdd = () => {
+    onChange(index, { options: [...options, { value: '', label: '' }] });
+  };
+
+  const handleOptionRemove = (optionIndex: number) => {
+    const updatedOptions = options.filter((_, i) => i !== optionIndex);
+    onChange(index, {
+      options: updatedOptions.length ? updatedOptions : [{ value: '', label: '' }],
+    });
+  };
 
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
@@ -64,7 +83,7 @@ export function FieldEditor({ field, index, onChange, onRemove }: FieldEditorPro
             <select
               className={inputClass}
               value={field.fieldType || 'text'}
-              onChange={(e) => onChange(index, { fieldType: e.target.value as FieldType })}
+              onChange={(e) => handleTypeChange(e.target.value as FieldType)}
             >
               {FIELD_TYPES.map((t) => (
                 <option key={t.value} value={t.value}>
@@ -88,28 +107,67 @@ export function FieldEditor({ field, index, onChange, onRemove }: FieldEditorPro
         <button
           type="button"
           onClick={() => onRemove(index)}
-          className="mt-5 text-gray-400 hover:text-red-500 transition-colors text-lg leading-none"
+          className="mt-5 rounded p-1 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
           aria-label="Remove field"
+          title="Remove field"
         >
-          ✕
+          <X className="h-4 w-4" />
         </button>
       </div>
 
       {field.fieldType === 'select' && (
         <div className="mt-3">
-          <label className="block text-xs font-medium text-gray-600 mb-1">
-            Options (key: value)
-          </label>
-          <textarea
-            className={inputClass}
-            rows={3}
-            placeholder={'admin: Administrator\nuser: Regular User\nviewer: Viewer Only'}
-            value={optionsText}
-            onChange={(e) => handleOptionsChange(e.target.value)}
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Format: value: Label (displayed to user)
-          </p>
+          <div className="mb-2 grid grid-cols-[1fr_1fr_2rem] gap-2">
+            <span className="text-xs font-medium text-gray-600">Value</span>
+            <span className="text-xs font-medium text-gray-600">Label</span>
+            <span className="sr-only">Remove</span>
+          </div>
+
+          <div className="space-y-2">
+            {options.map((option, optionIndex) => (
+              <div
+                key={optionIndex}
+                className="grid grid-cols-[1fr_1fr_2rem] items-center gap-2"
+              >
+                <input
+                  type="text"
+                  className={inputClass}
+                  placeholder="admin"
+                  value={option.value}
+                  onChange={(e) =>
+                    handleOptionChange(optionIndex, 'value', e.target.value)
+                  }
+                />
+                <input
+                  type="text"
+                  className={inputClass}
+                  placeholder="Administrator"
+                  value={option.label}
+                  onChange={(e) =>
+                    handleOptionChange(optionIndex, 'label', e.target.value)
+                  }
+                />
+                <button
+                  type="button"
+                  onClick={() => handleOptionRemove(optionIndex)}
+                  className="flex h-8 w-8 items-center justify-center rounded border border-gray-300 text-gray-500 transition-colors hover:border-red-300 hover:bg-red-50 hover:text-red-600"
+                  aria-label="Remove option"
+                  title="Remove option"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={handleOptionAdd}
+            className="mt-2 inline-flex items-center gap-1 rounded border border-gray-300 px-2.5 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:bg-white"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Add option
+          </button>
         </div>
       )}
     </div>
