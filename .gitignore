@@ -1,0 +1,20 @@
+# .NET build artifacts
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.userprefs
+
+# EF Core migration snapshots are committed; built outputs are not
+*.db
+*.db-shm
+*.db-wal
+
+# Secrets
+appsettings.*.local.json
+secrets.json
+
+# OS
+.DS_Store
+Thumbs.db
