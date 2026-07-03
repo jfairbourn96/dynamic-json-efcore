@@ -21,7 +21,9 @@ public class EmployeeTypeConfiguration : IEntityTypeConfiguration<EmployeeType>
 
         builder.OwnsMany(e => e.Fields, fields =>
         {
-            fields.ToJson();
+            fields.ToJson("FieldsJson");
+            
+            fields.OwnsMany(f => f.Options);
         });
     }
 }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmployeeApi.Migrations
 {
     [DbContext(typeof(EmployeeDbContext))]
-    [Migration("20260627222731_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20260703035956_NewInitialMigration")]
+    partial class NewInitialMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -130,12 +130,12 @@ namespace EmployeeApi.Migrations
                             b1.Property<int>("__synthesizedOrdinal")
                                 .ValueGeneratedOnAddOrUpdate();
 
-                            b1.Property<string>("DisplayName")
-                                .IsRequired();
-
                             b1.Property<int>("FieldType");
 
                             b1.Property<Guid>("Id");
+
+                            b1.Property<string>("Label")
+                                .IsRequired();
 
                             b1.Property<string>("Name")
                                 .IsRequired();
@@ -149,11 +149,36 @@ namespace EmployeeApi.Migrations
                             b1.ToTable("EmployeeType");
 
                             b1
-                                .ToJson("Fields")
+                                .ToJson("FieldsJson")
                                 .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("EmployeeTypeId");
+
+                            b1.OwnsMany("Dynamic.Employees.Core.Models.FieldOption", "Options", b2 =>
+                                {
+                                    b2.Property<Guid>("EmployeeTypeFieldEmployeeTypeId");
+
+                                    b2.Property<int>("EmployeeTypeField__synthesizedOrdinal");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAddOrUpdate();
+
+                                    b2.Property<string>("Label")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Value")
+                                        .IsRequired();
+
+                                    b2.HasKey("EmployeeTypeFieldEmployeeTypeId", "EmployeeTypeField__synthesizedOrdinal", "__synthesizedOrdinal");
+
+                                    b2.ToTable("EmployeeType");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("EmployeeTypeFieldEmployeeTypeId", "EmployeeTypeField__synthesizedOrdinal");
+                                });
+
+                            b1.Navigation("Options");
                         });
 
                     b.Navigation("Fields");

@@ -146,11 +146,36 @@ namespace EmployeeApi.Migrations
                             b1.ToTable("EmployeeType");
 
                             b1
-                                .ToJson("Fields")
+                                .ToJson("FieldsJson")
                                 .HasColumnType("nvarchar(max)");
 
                             b1.WithOwner()
                                 .HasForeignKey("EmployeeTypeId");
+
+                            b1.OwnsMany("Dynamic.Employees.Core.Models.FieldOption", "Options", b2 =>
+                                {
+                                    b2.Property<Guid>("EmployeeTypeFieldEmployeeTypeId");
+
+                                    b2.Property<int>("EmployeeTypeField__synthesizedOrdinal");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAddOrUpdate();
+
+                                    b2.Property<string>("Label")
+                                        .IsRequired();
+
+                                    b2.Property<string>("Value")
+                                        .IsRequired();
+
+                                    b2.HasKey("EmployeeTypeFieldEmployeeTypeId", "EmployeeTypeField__synthesizedOrdinal", "__synthesizedOrdinal");
+
+                                    b2.ToTable("EmployeeType");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("EmployeeTypeFieldEmployeeTypeId", "EmployeeTypeField__synthesizedOrdinal");
+                                });
+
+                            b1.Navigation("Options");
                         });
 
                     b.Navigation("Fields");

@@ -10,7 +10,6 @@ public class EmployeeTypeField
     public string Label { get; set; } = string.Empty;
     public FieldType FieldType { get; set; }
     public bool Required { get; set; }
-    [NotMapped]
     public List<FieldOption> Options { get; set; } = [];
     public int Order { get; set; }
 }

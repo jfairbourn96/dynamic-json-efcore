@@ -24,11 +24,14 @@ export function FieldEditor({ field, index, onChange, onRemove }: FieldEditorPro
       .split('\n')
       .map((line) => line.trim())
       .filter(Boolean)
-      .map((line) => ({ label: line, value: line.toLowerCase().replace(/\s+/g, '_') }));
+      .map((line) => {
+        const [value, label] = line.split(':').map((s) => s.trim());
+        return { value: value || '', label: label || value };
+      });
     onChange(index, { options });
   };
 
-  const optionsText = (field.options || []).map((o) => o.label).join('\n');
+  const optionsText = (field.options || []).map((o) => `${o.value}: ${o.label}`).join('\n');
 
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
@@ -95,15 +98,18 @@ export function FieldEditor({ field, index, onChange, onRemove }: FieldEditorPro
       {field.fieldType === 'select' && (
         <div className="mt-3">
           <label className="block text-xs font-medium text-gray-600 mb-1">
-            Options (one per line)
+            Options (key: value)
           </label>
           <textarea
             className={inputClass}
             rows={3}
-            placeholder={'Option A\nOption B\nOption C'}
+            placeholder={'admin: Administrator\nuser: Regular User\nviewer: Viewer Only'}
             value={optionsText}
             onChange={(e) => handleOptionsChange(e.target.value)}
           />
+          <p className="mt-1 text-xs text-gray-500">
+            Format: value: Label (displayed to user)
+          </p>
         </div>
       )}
     </div>
