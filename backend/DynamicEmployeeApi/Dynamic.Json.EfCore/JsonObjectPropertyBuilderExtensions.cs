@@ -1,9 +1,8 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Dynamic.Json.EfCore.Extensions;
+namespace Dynamic.Json.EfCore;
 
 public static class JsonObjectPropertyBuilderExtensions
 {

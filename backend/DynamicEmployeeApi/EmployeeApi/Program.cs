@@ -33,15 +33,6 @@ builder.Services.AddCors(options =>
 
 WebApplication app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-
-    using IServiceScope scope = app.Services.CreateScope();
-    EmployeeDbContext db = scope.ServiceProvider.GetRequiredService<EmployeeDbContext>();
-    db.Database.Migrate();
-}
-
 app.UseHttpsRedirection();
 app.UseCors();
 app.MapControllers();
