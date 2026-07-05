@@ -23,6 +23,7 @@ public class EmployeeController : ControllerBase
         _db = db;
     }
 
+// example query: http://localhost:5154/api/employees/search?firstName_startsWith=Jus&lastName_contains=bourn&department_exact=it&email=justin.fairbourn%40gmail.com&hireDate_startDate=2026-07-01&hireDate_endDate=2026-07-17&yearsOfExperience_gt=5&primaryLanguage_startsWith=C&graduationDate_startDate=2026-06-28&graduationDate_endDate=2026-07-17&level=se1&isFullstackCapable=false&employeeTypeId=af0976b0-83b1-4fb2-b58d-46cbf2bd7137&pageNumber=1&pageSize=20
     [HttpGet("search")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> Search(

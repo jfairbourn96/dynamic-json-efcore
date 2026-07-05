@@ -69,9 +69,10 @@
   - [x] Serialize as `fieldName_startDate=value` and `fieldName_endDate=value`
 
 - [x] Update dynamic boolean field filters
-  - [x] Render boolean fields as checkboxes
-  - [x] Serialize checked values as `fieldName=true`
-  - [x] Serialize unchecked values as `fieldName=false`
+  - [x] Render boolean fields as dropdowns with `Either`, `True`, and `False`
+  - [x] Omit the query param when `Either` is selected
+  - [x] Serialize `True` values as `fieldName=true`
+  - [x] Serialize `False` values as `fieldName=false`
 
 - [x] Update dynamic select field filters
   - [x] Render select fields as dropdowns using `FieldOption` values

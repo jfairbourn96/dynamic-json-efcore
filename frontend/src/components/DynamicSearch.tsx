@@ -4,6 +4,7 @@ import type { EmployeeSearchFilters } from '../types/records';
 
 type TextOperator = 'contains' | 'startsWith' | 'exact';
 type NumberOperator = 'lt' | 'lte' | 'eq' | 'gt' | 'gte';
+type BooleanFilterValue = 'either' | 'true' | 'false';
 
 interface TextFilterState {
   operator: TextOperator;
@@ -56,7 +57,7 @@ export function DynamicSearch({ fields, onSearch, isLoading = false }: DynamicSe
   const [hireDateFilter, setHireDateFilter] = useState<DateRangeState>(defaultDateRange);
   const [dynamicTextFilters, setDynamicTextFilters] = useState<Record<string, TextFilterState>>({});
   const [dynamicDateFilters, setDynamicDateFilters] = useState<Record<string, DateRangeState>>({});
-  const [dynamicBooleanFilters, setDynamicBooleanFilters] = useState<Record<string, boolean>>({});
+  const [dynamicBooleanFilters, setDynamicBooleanFilters] = useState<Record<string, BooleanFilterValue>>({});
   const [dynamicSelectFilters, setDynamicSelectFilters] = useState<Record<string, string>>({});
   const [dynamicNumberFilters, setDynamicNumberFilters] = useState<Record<string, NumberFilterState>>({});
 
@@ -139,7 +140,14 @@ export function DynamicSearch({ fields, onSearch, isLoading = false }: DynamicSe
           break;
         }
         case 'boolean':
-          filters[field.name] = dynamicBooleanFilters[field.name] ?? false;
+          if (dynamicBooleanFilters[field.name] === 'true') {
+            filters[field.name] = true;
+          }
+
+          if (dynamicBooleanFilters[field.name] === 'false') {
+            filters[field.name] = false;
+          }
+
           break;
         case 'select':
           addIfPresent(filters, field.name, dynamicSelectFilters[field.name]);
@@ -322,22 +330,22 @@ export function DynamicSearch({ fields, onSearch, isLoading = false }: DynamicSe
 
                 if (field.fieldType === 'boolean') {
                   return (
-                    <div key={field.id} className="flex items-center gap-2 pt-6">
-                      <input
-                        id={`search-${field.id}`}
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                        checked={dynamicBooleanFilters[field.name] ?? false}
+                    <div key={field.id}>
+                      {label}
+                      <select
+                        className={selectClass}
+                        value={dynamicBooleanFilters[field.name] ?? 'either'}
                         onChange={(e) =>
                           setDynamicBooleanFilters((prev) => ({
                             ...prev,
-                            [field.name]: e.target.checked,
+                            [field.name]: e.target.value as BooleanFilterValue,
                           }))
                         }
-                      />
-                      <label htmlFor={`search-${field.id}`} className="text-sm font-medium text-gray-700">
-                        {field.label}
-                      </label>
+                      >
+                        <option value="either">Either</option>
+                        <option value="true">True</option>
+                        <option value="false">False</option>
+                      </select>
                     </div>
                   );
                 }
