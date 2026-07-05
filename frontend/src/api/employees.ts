@@ -14,17 +14,12 @@ export const employeesApi = {
       params.append(key, String(value));
     };
 
-    appendIfPresent('firstName', filters.firstName);
-    appendIfPresent('lastName', filters.lastName);
-    appendIfPresent('email', filters.email);
-    appendIfPresent('department', filters.department);
-    appendIfPresent('employeeTypeId', filters.employeeTypeId);
+    Object.entries(filters).forEach(([key, value]) => {
+      appendIfPresent(key, value);
+    });
+
     appendIfPresent('pageNumber', pageNumber);
     appendIfPresent('pageSize', pageSize);
-
-    Object.entries(filters.fieldValues ?? {}).forEach(([name, value]) => {
-      appendIfPresent(`fieldValues.${name}`, value);
-    });
 
     return api.get<PagedResult<Employee>>(`/employees/search?${params.toString()}`);
   },

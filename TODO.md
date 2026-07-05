@@ -48,45 +48,45 @@
 
 ## 3. Update frontend employee search filters for typed query operators
 
-- [ ] Update `DynamicSearch` core text filters
-  - [ ] Keep `Email` as a plain text filter
-  - [ ] Add operator dropdowns for `First Name`, `Last Name`, and `Department`
-  - [ ] Support `Contains`, `Starts With`, and `Exact Match`
-  - [ ] Serialize text filters as `fieldName_contains=value`, `fieldName_startsWith=value`, or `fieldName_exact=value`
+- [x] Update `DynamicSearch` core text filters
+  - [x] Keep `Email` as a plain text filter
+  - [x] Add operator dropdowns for `First Name`, `Last Name`, and `Department`
+  - [x] Support `Contains`, `Starts With`, and `Exact Match`
+  - [x] Serialize text filters as `fieldName_contains=value`, `fieldName_startsWith=value`, or `fieldName_exact=value`
 
-- [ ] Add a core `Hire Date` range filter
-  - [ ] Add optional start date input
-  - [ ] Add optional end date input
-  - [ ] Serialize as `hireDate_startDate=value` and `hireDate_endDate=value`
+- [x] Add a core `Hire Date` range filter
+  - [x] Add optional start date input
+  - [x] Add optional end date input
+  - [x] Serialize as `hireDate_startDate=value` and `hireDate_endDate=value`
 
-- [ ] Update dynamic text field filters
-  - [ ] Add operator dropdowns for dynamic text fields
-  - [ ] Support `Contains`, `Starts With`, and `Exact Match`
-  - [ ] Serialize as `fieldName_contains=value`, `fieldName_startsWith=value`, or `fieldName_exact=value`
+- [x] Update dynamic text field filters
+  - [x] Add operator dropdowns for dynamic text fields
+  - [x] Support `Contains`, `Starts With`, and `Exact Match`
+  - [x] Serialize as `fieldName_contains=value`, `fieldName_startsWith=value`, or `fieldName_exact=value`
 
-- [ ] Update dynamic date field filters
-  - [ ] Replace single date/text filter with optional start/end date inputs
-  - [ ] Serialize as `fieldName_startDate=value` and `fieldName_endDate=value`
+- [x] Update dynamic date field filters
+  - [x] Replace single date/text filter with optional start/end date inputs
+  - [x] Serialize as `fieldName_startDate=value` and `fieldName_endDate=value`
 
-- [ ] Update dynamic boolean field filters
-  - [ ] Render boolean fields as checkboxes
-  - [ ] Serialize checked values as `fieldName=true`
-  - [ ] Serialize unchecked values as `fieldName=false`
+- [x] Update dynamic boolean field filters
+  - [x] Render boolean fields as checkboxes
+  - [x] Serialize checked values as `fieldName=true`
+  - [x] Serialize unchecked values as `fieldName=false`
 
-- [ ] Update dynamic select field filters
-  - [ ] Render select fields as dropdowns using `FieldOption` values
-  - [ ] Serialize selected options as `fieldName=fieldOptionValue`
+- [x] Update dynamic select field filters
+  - [x] Render select fields as dropdowns using `FieldOption` values
+  - [x] Serialize selected options as `fieldName=fieldOptionValue`
 
-- [ ] Update dynamic number field filters
-  - [ ] Add operator dropdown with `Less than`, `Less than or equal to`, `Equal to`, `Greater than`, and `Greater than or equal to`
-  - [ ] Add numeric value input
-  - [ ] Serialize as `fieldName_lt=value`, `fieldName_lte=value`, `fieldName=value`, `fieldName_gt=value`, or `fieldName_gte=value`
+- [x] Update dynamic number field filters
+  - [x] Add operator dropdown with `Less than`, `Less than or equal to`, `Equal to`, `Greater than`, and `Greater than or equal to`
+  - [x] Add numeric value input
+  - [x] Serialize as `fieldName_lt=value`, `fieldName_lte=value`, `fieldName=value`, `fieldName_gt=value`, or `fieldName_gte=value`
 
-- [ ] Update frontend search serialization
-  - [ ] Remove the old `fieldValues.<fieldName>` query parameter format
-  - [ ] Build query params directly from the operator-aware search state
-  - [ ] Keep `employeeTypeId`, `pageNumber`, and `pageSize` query params unchanged
+- [x] Update frontend search serialization
+  - [x] Remove the old `fieldValues.<fieldName>` query parameter format
+  - [x] Build query params directly from the operator-aware search state
+  - [x] Keep `employeeTypeId`, `pageNumber`, and `pageSize` query params unchanged
 
 - [ ] Verify frontend search changes
-  - [ ] Run `npm.cmd run build`
+  - [x] Run `npm.cmd run build`
   - [ ] Smoke-check generated query strings for core and dynamic filters
