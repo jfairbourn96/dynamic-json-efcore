@@ -6,6 +6,9 @@ using Microsoft.Extensions.Primitives;
 
 namespace Dynamic.Json.EfCore.AspNetCore;
 
+/// <summary>
+/// Parses ASP.NET Core query-string parameters into dynamic search filters.
+/// </summary>
 public static class DynamicSearchQueryParser
 {
     private static readonly Regex SafeDynamicFieldName = new(
@@ -25,6 +28,12 @@ public static class DynamicSearchQueryParser
         ("_gt", SearchOperator.GreaterThan),
     ];
 
+    /// <summary>
+    /// Determines whether the query string contains any non-ignored dynamic search parameters.
+    /// </summary>
+    /// <param name="parameters">The query-string parameters to inspect.</param>
+    /// <param name="options">Optional parser settings for ignored keys and prefixes.</param>
+    /// <returns><see langword="true" /> when at least one non-empty dynamic search parameter is present.</returns>
     public static bool HasDynamicSearchParameters(
         IQueryCollection parameters,
         DynamicSearchQueryParserOptions? options = null)
@@ -32,6 +41,13 @@ public static class DynamicSearchQueryParser
         return parameters.Any(parameter => IsDynamicSearchParameter(parameter, options));
     }
 
+    /// <summary>
+    /// Parses query-string parameters into validated dynamic search filters.
+    /// </summary>
+    /// <param name="parameters">The query-string parameters to parse.</param>
+    /// <param name="fields">The searchable field definitions used for validation.</param>
+    /// <param name="options">Optional parser settings for ignored keys and prefixes.</param>
+    /// <returns>A parse result containing valid filters and validation errors.</returns>
     public static DynamicSearchFilterParseResult Parse(
         IQueryCollection parameters,
         IEnumerable<DynamicSearchField> fields,

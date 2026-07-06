@@ -11,8 +11,14 @@ using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 
 namespace Dynamic.Json.EfCore.SqlServer;
 
+/// <summary>
+/// SQL Server method-call translator provider that adds translations for Dynamic.Json.EfCore functions.
+/// </summary>
 public sealed class DynamicJsonSqlServerMethodCallTranslatorProvider : SqlServerMethodCallTranslatorProvider
 {
+    /// <summary>
+    /// Creates a translator provider for Dynamic.Json.EfCore SQL Server JSON functions.
+    /// </summary>
     public DynamicJsonSqlServerMethodCallTranslatorProvider(
         RelationalMethodCallTranslatorProviderDependencies dependencies,
         ISqlServerSingletonOptions sqlServerSingletonOptions)
