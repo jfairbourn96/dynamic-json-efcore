@@ -9,32 +9,32 @@ namespace Dynamic.Json.EfCore.Tests.AspNetCore;
 
 public class DynamicSearchQueryParserTests
 {
-    public static TheoryData<string, string, DynamicSearchFieldType, string, SearchOperator> ValidNumberFilterParameters => new()
+    public static TheoryData<string, string, DynamicSearchFilter> ValidNumberFilterParameters => new()
     {
-        { "numberOfSongs", "numberOfSongs_gt", DynamicSearchFieldType.Number, "7", SearchOperator.GreaterThan },
-        { "numberOfSongs", "numberOfSongs_gte", DynamicSearchFieldType.Number, "7", SearchOperator.GreaterThanOrEqual },
-        { "numberOfSongs", "numberOfSongs_lt", DynamicSearchFieldType.Number, "7", SearchOperator.LessThan },
-        { "numberOfSongs", "numberOfSongs_lte", DynamicSearchFieldType.Number, "7", SearchOperator.LessThanOrEqual },
-        { "numberOfSongs", "numberOfSongs", DynamicSearchFieldType.Number, "7", SearchOperator.Exact },
+        { "numberOfSongs_gt", "7", new DynamicSearchFilter("numberOfSongs", DynamicSearchFieldType.Number, SearchOperator.GreaterThan, "7") },
+        { "numberOfSongs_gte", "7", new DynamicSearchFilter("numberOfSongs", DynamicSearchFieldType.Number, SearchOperator.GreaterThanOrEqual, "7") },
+        { "numberOfSongs_lt", "7", new DynamicSearchFilter("numberOfSongs", DynamicSearchFieldType.Number, SearchOperator.LessThan, "7") },
+        { "numberOfSongs_lte", "7", new DynamicSearchFilter("numberOfSongs", DynamicSearchFieldType.Number, SearchOperator.LessThanOrEqual, "7") },
+        { "numberOfSongs", "7", new DynamicSearchFilter("numberOfSongs", DynamicSearchFieldType.Number, SearchOperator.Exact, "7") },
     };
 
-    public static TheoryData<string, string, DynamicSearchFieldType, string, SearchOperator> ValidDateFilterParameters => new()
+    public static TheoryData<string, string, DynamicSearchFilter> ValidDateFilterParameters => new()
     {
-        { "coronationDate", "coronationDate_startDate", DynamicSearchFieldType.Date, "2013-11-27", SearchOperator.StartDate },
-        { "coronationDate", "coronationDate_endDate", DynamicSearchFieldType.Date, "2013-11-27", SearchOperator.EndDate },
+        { "coronationDate_startDate", "2013-11-27", new DynamicSearchFilter("coronationDate", DynamicSearchFieldType.Date, SearchOperator.StartDate, "2013-11-27") },
+        { "coronationDate_endDate", "2013-11-27", new DynamicSearchFilter("coronationDate", DynamicSearchFieldType.Date, SearchOperator.EndDate, "2013-11-27") },
     };
 
-    public static TheoryData<string, string, DynamicSearchFieldType, string, SearchOperator> ValidBoolFilterParameters => new()
+    public static TheoryData<string, string, DynamicSearchFilter> ValidBoolFilterParameters => new()
     {
-        { "hasIcePowers", "hasIcePowers", DynamicSearchFieldType.Boolean, "true", SearchOperator.Exact },
-        { "hasIcePowers", "hasIcePowers", DynamicSearchFieldType.Boolean, "false", SearchOperator.Exact },
+        { "hasIcePowers", "true", new DynamicSearchFilter("hasIcePowers", DynamicSearchFieldType.Boolean, SearchOperator.Exact, "true") },
+        { "hasIcePowers", "false", new DynamicSearchFilter("hasIcePowers", DynamicSearchFieldType.Boolean, SearchOperator.Exact, "false") },
     };
 
-    public static TheoryData<string, string, DynamicSearchFieldType, string, SearchOperator> ValidTextFilterParameters => new()
+    public static TheoryData<string, string, DynamicSearchFilter> ValidTextFilterParameters => new()
     {
-        { "favoriteSongName", "favoriteSongName", DynamicSearchFieldType.Text, "Let It Go", SearchOperator.Exact },
-        { "favoriteSongName", "favoriteSongName_startsWith", DynamicSearchFieldType.Text, "Let", SearchOperator.StartsWith },
-        { "favoriteSongName", "favoriteSongName_contains", DynamicSearchFieldType.Text, "It Go", SearchOperator.Contains },
+        { "favoriteSongName", "Let It Go", new DynamicSearchFilter("favoriteSongName", DynamicSearchFieldType.Text, SearchOperator.Exact, "Let It Go") },
+        { "favoriteSongName_startsWith", "Let", new DynamicSearchFilter("favoriteSongName", DynamicSearchFieldType.Text, SearchOperator.StartsWith, "Let") },
+        { "favoriteSongName_contains", "It Go", new DynamicSearchFilter("favoriteSongName", DynamicSearchFieldType.Text, SearchOperator.Contains, "It Go") },
     };
 
     public static TheoryData<string, string, DynamicSearchParseError> InvalidFilterParameters => new()
@@ -144,11 +144,9 @@ public class DynamicSearchQueryParserTests
     [MemberData(nameof(ValidBoolFilterParameters))]
     [MemberData(nameof(ValidTextFilterParameters))]
     public void Parse_ValidParameters_ReturnsDynamicSearchFilters(
-        string fieldName,
         string queryParamName,
-        DynamicSearchFieldType fieldType,
         string value,
-        SearchOperator expectedOperator)
+        DynamicSearchFilter expectedFilter)
     {
         QueryCollection parameters = new(new Dictionary<string, StringValues>
         {
@@ -157,10 +155,10 @@ public class DynamicSearchQueryParserTests
 
         DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
             parameters,
-            [new DynamicSearchField(fieldName, fieldType)]);
+            GetSearchFields());
 
         result.Errors.Should().BeEmpty();
-        result.Filters.Should().BeEquivalentTo([new DynamicSearchFilter(fieldName, fieldType, expectedOperator, value)]);
+        result.Filters.Should().BeEquivalentTo([expectedFilter]);
     }
 
     [Theory]
@@ -178,7 +176,7 @@ public class DynamicSearchQueryParserTests
 
         DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
             parameters,
-            [new DynamicSearchField(fieldName, DynamicSearchFieldType.Select, ["Arendelle", "Northuldra"])]);
+            GetSearchFields());
 
         result.Errors.Should().BeEmpty();
         result.Filters.Should().BeEquivalentTo(
@@ -249,6 +247,141 @@ public class DynamicSearchQueryParserTests
 
         result.Filters.Should().BeEmpty();
         result.Errors.Should().BeEmpty();
+    }
+
+    [Fact]
+    public void Parse_IgnoredParametersWithValidParameter_ReturnsOnlyDynamicSearchFilter()
+    {
+        QueryCollection parameters = new(new Dictionary<string, StringValues>
+        {
+            ["pageNumber"] = "1",
+            ["core_name"] = "Elsa",
+            ["favoriteSongName"] = "Into The Unknown",
+        });
+
+        DynamicSearchQueryParserOptions options = CreateParserOptions(
+            ignoredKeys: ["pageNumber"],
+            ignoredKeyPrefixes: ["core_"]);
+
+        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+            parameters,
+            GetSearchFields(),
+            options);
+
+        result.Errors.Should().BeEmpty();
+        result.Filters.Should().BeEquivalentTo(
+        [
+            new DynamicSearchFilter("favoriteSongName", DynamicSearchFieldType.Text, SearchOperator.Exact, "Into The Unknown")
+        ]);
+    }
+
+    [Fact]
+    public void Parse_FieldLookup_IsCaseInsensitive()
+    {
+        QueryCollection parameters = new(new Dictionary<string, StringValues>
+        {
+            ["FAVORITESONGNAME_contains"] = "Unknown",
+        });
+
+        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+            parameters,
+            GetSearchFields());
+
+        result.Errors.Should().BeEmpty();
+        result.Filters.Should().BeEquivalentTo(
+        [
+            new DynamicSearchFilter("favoriteSongName", DynamicSearchFieldType.Text, SearchOperator.Contains, "Unknown")
+        ]);
+    }
+
+    [Fact]
+    public void Parse_SelectOptionValidation_IsCaseSensitive()
+    {
+        QueryCollection parameters = new(new Dictionary<string, StringValues>
+        {
+            ["kingdom"] = "arendelle",
+        });
+
+        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+            parameters,
+            GetSearchFields());
+
+        result.Filters.Should().BeEmpty();
+        result.Errors.Should().ContainSingle().Which.Should().Be(
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidSelectOptionValue,
+                "kingdom",
+                "kingdom",
+                SearchOperator.Exact,
+                "arendelle"));
+    }
+
+    [Fact]
+    public void Parse_TrimmedValue_ReturnsTrimmedValueInFilter()
+    {
+        QueryCollection parameters = new(new Dictionary<string, StringValues>
+        {
+            ["favoriteSongName"] = "  Let It Go  ",
+        });
+
+        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+            parameters,
+            GetSearchFields());
+
+        result.Errors.Should().BeEmpty();
+        result.Filters.Should().BeEquivalentTo(
+        [
+            new DynamicSearchFilter("favoriteSongName", DynamicSearchFieldType.Text, SearchOperator.Exact, "Let It Go")
+        ]);
+    }
+
+    [Fact]
+    public void Parse_MultipleValidParameters_ReturnsAllDynamicSearchFilters()
+    {
+        QueryCollection parameters = new(new Dictionary<string, StringValues>
+        {
+            ["favoriteSongName_contains"] = "Go",
+            ["numberOfSongs_gte"] = "7",
+            ["hasIcePowers"] = "true",
+        });
+
+        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+            parameters,
+            GetSearchFields());
+
+        result.Errors.Should().BeEmpty();
+        result.Filters.Should().BeEquivalentTo(
+        [
+            new DynamicSearchFilter("favoriteSongName", DynamicSearchFieldType.Text, SearchOperator.Contains, "Go"),
+            new DynamicSearchFilter("numberOfSongs", DynamicSearchFieldType.Number, SearchOperator.GreaterThanOrEqual, "7"),
+            new DynamicSearchFilter("hasIcePowers", DynamicSearchFieldType.Boolean, SearchOperator.Exact, "true"),
+        ]);
+    }
+
+    [Fact]
+    public void Parse_ValidAndInvalidParameters_ReturnsFiltersAndErrors()
+    {
+        QueryCollection parameters = new(new Dictionary<string, StringValues>
+        {
+            ["favoriteSongName_contains"] = "Go",
+            ["snowmanName"] = "Olaf",
+        });
+
+        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+            parameters,
+            GetSearchFields());
+
+        result.Filters.Should().BeEquivalentTo(
+        [
+            new DynamicSearchFilter("favoriteSongName", DynamicSearchFieldType.Text, SearchOperator.Contains, "Go")
+        ]);
+        result.Errors.Should().ContainSingle().Which.Should().Be(
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.UnknownField,
+                "snowmanName",
+                "snowmanName",
+                SearchOperator.Exact,
+                "Olaf"));
     }
 
     [Theory]
