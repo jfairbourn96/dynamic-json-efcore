@@ -4,7 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageId>EfCore.DynamicJson</PackageId>
+        <PackageId>Dynamic.Json.EfCore</PackageId>
         <Description>Provider-neutral EF Core helpers for mapping, tracking, and querying dynamic JSON fields.</Description>
     </PropertyGroup>
 

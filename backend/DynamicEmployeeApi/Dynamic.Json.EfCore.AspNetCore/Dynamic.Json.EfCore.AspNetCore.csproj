@@ -4,6 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageId>Dynamic.Json.EfCore.AspNetCore</PackageId>
         <Description>ASP.NET Core query-string parsing helpers for Dynamic.Json.EfCore search filters.</Description>
     </PropertyGroup>
 

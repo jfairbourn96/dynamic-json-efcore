@@ -4,6 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <PackageId>Dynamic.Json.EfCore.SqlServer</PackageId>
         <Description>SQL Server EF Core translations for Dynamic.Json.EfCore JSON query functions.</Description>
     </PropertyGroup>
 
