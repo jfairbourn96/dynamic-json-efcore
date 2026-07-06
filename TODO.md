@@ -39,3 +39,28 @@ Add integration tests for provider-specific `Dynamic.Json.EfCore.*` behavior usi
 - Add Swagger/OpenAPI documentation back intentionally after choosing a package/version without known vulnerabilities.
 - Document dynamic search query parameters, supported operators, field types, and error responses.
 - Include examples for core employee filters and dynamic JSON field filters.
+
+## NuGet Publishing
+
+- Add shared package metadata for all publishable projects:
+  - `Authors`
+  - `RepositoryUrl`
+  - `PackageTags`
+  - `PackageReadmeFile`
+  - `GenerateDocumentationFile`
+  - license metadata
+- Add a package-focused `README.md` to each NuGet package or configure a shared package README.
+- Add a `LICENSE` file before publishing publicly.
+- Decide the first package version, likely `0.1.0-preview.1`.
+- Add GitHub Actions CI for pull requests:
+  - restore
+  - build
+  - run `Dynamic.Json.EfCore.UnitTests`
+  - optionally run package vulnerability audit
+- Add GitHub Actions publish workflow for tags/releases:
+  - run unit tests
+  - pack `Dynamic.Json.EfCore`
+  - pack `Dynamic.Json.EfCore.AspNetCore`
+  - pack `Dynamic.Json.EfCore.SqlServer`
+  - publish packages to NuGet using a repository secret such as `NUGET_API_KEY`
+- Keep Docker/Testcontainers integration tests separate from the required NuGet publish path until they are stable in CI.

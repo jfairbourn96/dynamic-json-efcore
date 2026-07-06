@@ -7,7 +7,7 @@ This checklist tracks meaningful test coverage for the `Dynamic.Json.EfCore.*` p
 Last verified with:
 
 ```text
-dotnet test backend\DynamicEmployeeApi\Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj --no-restore
+dotnet test Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj --no-restore
 Passed: 66, Failed: 0, Skipped: 0
 ```
 
