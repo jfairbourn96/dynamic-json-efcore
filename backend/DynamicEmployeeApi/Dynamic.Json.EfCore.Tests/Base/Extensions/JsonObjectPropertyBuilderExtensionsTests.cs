@@ -5,7 +5,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 
-namespace Dynamic.Json.EfCore.Tests.Extensions;
+namespace Dynamic.Json.EfCore.Tests.Base.Extensions;
 
 public class JsonObjectPropertyBuilderExtensionsTests : IDisposable
 {
