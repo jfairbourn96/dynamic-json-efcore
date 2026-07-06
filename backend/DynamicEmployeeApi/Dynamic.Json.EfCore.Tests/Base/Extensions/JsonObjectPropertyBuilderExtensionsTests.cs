@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Dynamic.Json.EfCore.ChangeTracking;
 using Dynamic.Json.EfCore.Metadata;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
@@ -108,6 +109,31 @@ public class JsonObjectPropertyBuilderExtensionsTests : IDisposable
         updated.Values["existing"]!.GetValue<string>().Should().Be("yes");
     }
 
+    [Fact]
+    public void HasJsonConversion_DefaultMode_UsesSemanticComparer()
+    {
+        using TestDbContext ctx = CreateContext();
+
+        ctx.Model.FindEntityType(typeof(TestRecord))!
+            .FindProperty(nameof(TestRecord.Values))!
+            .GetValueComparer()
+            .Should().BeOfType<JsonObjectValueComparer>();
+    }
+
+    [Fact]
+    public void HasJsonConversion_SerializedMode_UsesSerializedComparer()
+    {
+        DbContextOptions options = new DbContextOptionsBuilder<SerializedComparisonDbContext>()
+            .UseSqlite(_connection)
+            .Options;
+        using SerializedComparisonDbContext ctx = new(options);
+
+        ctx.Model.FindEntityType(typeof(SerializedComparisonRecord))!
+            .FindProperty(nameof(SerializedComparisonRecord.Values))!
+            .GetValueComparer()
+            .Should().BeOfType<SerializedJsonObjectValueComparer>();
+    }
+
     private TestDbContext CreateContext()
     {
         DbContextOptions options = new DbContextOptionsBuilder<TestDbContext>()
@@ -134,6 +160,26 @@ public class JsonObjectPropertyBuilderExtensionsTests : IDisposable
             {
                 entity.HasKey(r => r.Id);
                 entity.Property(r => r.Values).HasJsonConversion();
+            });
+        }
+    }
+
+    private class SerializedComparisonRecord
+    {
+        public Guid Id { get; set; }
+        public JsonObject Values { get; set; } = new();
+    }
+
+    private class SerializedComparisonDbContext(DbContextOptions options) : DbContext(options)
+    {
+        public DbSet<SerializedComparisonRecord> Records => Set<SerializedComparisonRecord>();
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<SerializedComparisonRecord>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+                entity.Property(r => r.Values).HasJsonConversion(JsonObjectComparisonMode.Serialized);
             });
         }
     }
