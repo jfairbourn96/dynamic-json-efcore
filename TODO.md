@@ -42,25 +42,35 @@ Add integration tests for provider-specific `Dynamic.Json.EfCore.*` behavior usi
 
 ## NuGet Publishing
 
-- Add shared package metadata for all publishable projects:
+### Completed
+
+- [x] Add shared package metadata for all publishable projects:
   - `Authors`
   - `RepositoryUrl`
   - `PackageTags`
   - `PackageReadmeFile`
   - `GenerateDocumentationFile`
   - license metadata
-- Add a package-focused `README.md` to each NuGet package or configure a shared package README.
-- Add a `LICENSE` file before publishing publicly.
-- Decide the first package version, likely `0.1.0-preview.1`.
-- Add GitHub Actions CI for pull requests:
+- [x] Configure the shared `README.md` as the NuGet package README.
+- [x] Add a `LICENSE` file before publishing publicly.
+- [x] Decide the first package version: `0.1.0-preview.1`.
+- [x] Add GitHub Actions CI for pull requests:
   - restore
   - build
   - run `Dynamic.Json.EfCore.UnitTests`
-  - optionally run package vulnerability audit
-- Add GitHub Actions publish workflow for tags/releases:
+  - run package vulnerability audit
+  - pack packages
+- [x] Add GitHub Actions publish workflow for tags/releases:
   - run unit tests
   - pack `Dynamic.Json.EfCore`
   - pack `Dynamic.Json.EfCore.AspNetCore`
   - pack `Dynamic.Json.EfCore.SqlServer`
-  - publish packages to NuGet using a repository secret such as `NUGET_API_KEY`
-- Keep Docker/Testcontainers integration tests separate from the required NuGet publish path until they are stable in CI.
+  - publish packages to NuGet using `NUGET_API_KEY`
+- [x] Keep Docker/Testcontainers integration tests separate from the required NuGet publish path until they are stable in CI.
+
+### Remaining Release Setup
+
+- [ ] Add `NUGET_API_KEY` as a GitHub Actions repository secret.
+- [ ] Confirm the NuGet package owner/profile information before the first publish.
+- [ ] Create the first release tag when ready, likely `v0.1.0-preview.1`.
+- [ ] Consider adding symbol packages and SourceLink after the first preview package flow is proven.
