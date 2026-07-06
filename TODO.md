@@ -33,3 +33,9 @@ Add integration tests for provider-specific `Dynamic.Json.EfCore.*` behavior usi
 
 - Add equivalent Docker-backed tests when PostgreSQL support is introduced.
 - Add equivalent integration tests when Newtonsoft/JObject support is introduced.
+
+## API Documentation
+
+- Add Swagger/OpenAPI documentation back intentionally after choosing a package/version without known vulnerabilities.
+- Document dynamic search query parameters, supported operators, field types, and error responses.
+- Include examples for core employee filters and dynamic JSON field filters.
