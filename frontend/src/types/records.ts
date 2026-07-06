@@ -28,14 +28,9 @@ export interface UpdateEmployeeRequest extends CreateEmployeeRequest {
   id: string;
 }
 
-export interface EmployeeSearchFilters {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  department?: string;
-  employeeTypeId?: string;
-  fieldValues?: Record<string, unknown>;
-}
+export type EmployeeSearchValue = string | number | boolean;
+
+export type EmployeeSearchFilters = Record<string, EmployeeSearchValue | undefined>;
 
 export interface PagedResult<T> {
   items: T[];

@@ -1,5 +1,6 @@
 using Dynamic.Employees.Core.Interfaces;
 using Dynamic.Employees.Data.Repositories;
+using Dynamic.Json.EfCore.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,8 +12,10 @@ public static class EmployeeDataExtensions
         string connectionString) where TContext : BaseEmployeeDbContext
     {
         services.AddDbContext<TContext>(options =>
-            options.UseSqlServer(connectionString,
-                x => x.MigrationsAssembly(typeof(TContext).Assembly.GetName().Name)));
+            options
+                .UseSqlServer(connectionString,
+                    x => x.MigrationsAssembly(typeof(TContext).Assembly.GetName().Name))
+                .UseDynamicJsonSqlServer());
 
         // Allows controllers/services to inject BaseEmployeeDbContext directly.
         // Remove once the repository pattern is in place and nothing injects the DbContext directly.

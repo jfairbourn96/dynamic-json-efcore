@@ -1,5 +1,6 @@
 using Dynamic.Employees.Data;
 using Dynamic.Employees.Data.Extensions;
+using Dynamic.Json.EfCore.AspNetCore;
 using EmployeeApi;
 using EmployeeApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +11,7 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' is not configured.");
 
 builder.Services.RegisterEmployeeDataServices<EmployeeDbContext>(connectionString);
+builder.Services.AddDynamicJsonEfCoreAspNetCore();
 
 // Register application services
 builder.Services.AddScoped<IEmployeeTypeService, EmployeeTypeService>();
@@ -19,8 +21,6 @@ builder.Services.AddControllers()
     {
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter(System.Text.Json.JsonNamingPolicy.CamelCase));
     });
-
-builder.Services.AddOpenApi();
 
 builder.Services.AddCors(options =>
 {
@@ -32,15 +32,6 @@ builder.Services.AddCors(options =>
 });
 
 WebApplication app = builder.Build();
-
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-
-    using IServiceScope scope = app.Services.CreateScope();
-    EmployeeDbContext db = scope.ServiceProvider.GetRequiredService<EmployeeDbContext>();
-    db.Database.Migrate();
-}
 
 app.UseHttpsRedirection();
 app.UseCors();

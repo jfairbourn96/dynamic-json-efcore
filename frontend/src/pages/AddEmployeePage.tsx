@@ -32,7 +32,7 @@ export function AddEmployeePage() {
 
   const createMutation = useMutation({
     mutationFn: (req: CreateEmployeeRequest) => employeesApi.create(req),
-    onSuccess: (employee) => navigate(`/employees/${employee.id}`),
+    onSuccess: (id) => navigate(`/employees/${id}`),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
