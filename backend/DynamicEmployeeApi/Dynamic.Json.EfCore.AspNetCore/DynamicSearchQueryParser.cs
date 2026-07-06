@@ -7,9 +7,9 @@ using Microsoft.Extensions.Primitives;
 namespace Dynamic.Json.EfCore.AspNetCore;
 
 /// <summary>
-/// Parses ASP.NET Core query-string parameters into dynamic search filters.
+/// Default parser for ASP.NET Core query-string parameters into dynamic search filters.
 /// </summary>
-public static class DynamicSearchQueryParser
+public sealed class DynamicSearchQueryParser : IDynamicSearchQueryParser
 {
     private static readonly Regex SafeDynamicFieldName = new(
         "^[A-Za-z][A-Za-z0-9_]*$",
@@ -34,7 +34,7 @@ public static class DynamicSearchQueryParser
     /// <param name="parameters">The query-string parameters to inspect.</param>
     /// <param name="options">Optional parser settings for ignored keys and prefixes.</param>
     /// <returns><see langword="true" /> when at least one non-empty dynamic search parameter is present.</returns>
-    public static bool HasDynamicSearchParameters(
+    public bool HasDynamicSearchParameters(
         IQueryCollection parameters,
         DynamicSearchQueryParserOptions? options = null)
     {
@@ -48,7 +48,7 @@ public static class DynamicSearchQueryParser
     /// <param name="fields">The searchable field definitions used for validation.</param>
     /// <param name="options">Optional parser settings for ignored keys and prefixes.</param>
     /// <returns>A parse result containing valid filters and validation errors.</returns>
-    public static DynamicSearchFilterParseResult Parse(
+    public DynamicSearchFilterParseResult Parse(
         IQueryCollection parameters,
         IEnumerable<DynamicSearchField> fields,
         DynamicSearchQueryParserOptions? options = null)

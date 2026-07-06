@@ -2,6 +2,7 @@ using Dynamic.Json.EfCore.Search;
 using Dynamic.Json.EfCore.AspNetCore;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Xunit;
 
@@ -9,6 +10,8 @@ namespace Dynamic.Json.EfCore.Tests.AspNetCore;
 
 public class DynamicSearchQueryParserTests
 {
+    private readonly IDynamicSearchQueryParser _parser = new DynamicSearchQueryParser();
+
     public static TheoryData<string, string, DynamicSearchFilter> ValidNumberFilterParameters => new()
     {
         { "numberOfSongs_gt", "7", new DynamicSearchFilter("numberOfSongs", DynamicSearchFieldType.Number, SearchOperator.GreaterThan, "7") },
@@ -153,7 +156,7 @@ public class DynamicSearchQueryParserTests
             [queryParamName] = value
         });
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields());
 
@@ -174,7 +177,7 @@ public class DynamicSearchQueryParserTests
             [queryParamName] = value
         });
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields());
 
@@ -198,7 +201,7 @@ public class DynamicSearchQueryParserTests
             [queryParamName] = value,
         });
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             [field]);
 
@@ -218,7 +221,7 @@ public class DynamicSearchQueryParserTests
             [queryParamName] = value
         });
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields());
 
@@ -240,7 +243,7 @@ public class DynamicSearchQueryParserTests
             ignoredKeys: ["pageNumber"],
             ignoredKeyPrefixes: ["core_"]);
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields(),
             options);
@@ -263,7 +266,7 @@ public class DynamicSearchQueryParserTests
             ignoredKeys: ["pageNumber"],
             ignoredKeyPrefixes: ["core_"]);
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields(),
             options);
@@ -283,7 +286,7 @@ public class DynamicSearchQueryParserTests
             ["FAVORITESONGNAME_contains"] = "Unknown",
         });
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields());
 
@@ -302,7 +305,7 @@ public class DynamicSearchQueryParserTests
             ["kingdom"] = "arendelle",
         });
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields());
 
@@ -324,7 +327,7 @@ public class DynamicSearchQueryParserTests
             ["favoriteSongName"] = "  Let It Go  ",
         });
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields());
 
@@ -345,7 +348,7 @@ public class DynamicSearchQueryParserTests
             ["hasIcePowers"] = "true",
         });
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields());
 
@@ -367,7 +370,7 @@ public class DynamicSearchQueryParserTests
             ["snowmanName"] = "Olaf",
         });
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _parser.Parse(
             parameters,
             GetSearchFields());
 
@@ -384,6 +387,19 @@ public class DynamicSearchQueryParserTests
                 "Olaf"));
     }
 
+    [Fact]
+    public void AddDynamicJsonEfCoreAspNetCore_RegistersDynamicSearchQueryParser()
+    {
+        ServiceCollection services = new();
+
+        services.AddDynamicJsonEfCoreAspNetCore();
+
+        using ServiceProvider provider = services.BuildServiceProvider();
+        IDynamicSearchQueryParser parser = provider.GetRequiredService<IDynamicSearchQueryParser>();
+
+        parser.Should().BeOfType<DynamicSearchQueryParser>();
+    }
+
     [Theory]
     [MemberData(nameof(DynamicSearchParameterPresence))]
     public void HasDynamicSearchParameters_ReturnsWhetherQueryContainsNonIgnoredParameters(
@@ -391,7 +407,7 @@ public class DynamicSearchQueryParserTests
         DynamicSearchQueryParserOptions? options,
         bool expectedResult)
     {
-        bool result = DynamicSearchQueryParser.HasDynamicSearchParameters(parameters, options);
+        bool result = _parser.HasDynamicSearchParameters(parameters, options);
 
         result.Should().Be(expectedResult);
     }

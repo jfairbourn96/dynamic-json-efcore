@@ -21,11 +21,15 @@ namespace EmployeeApi.Controllers;
 public class EmployeeController : ControllerBase
 {
     private readonly BaseEmployeeDbContext _db;
+    private readonly IDynamicSearchQueryParser _dynamicSearchQueryParser;
     private static readonly DynamicSearchQueryParserOptions DynamicSearchParserOptions = CreateDynamicSearchParserOptions();
 
-    public EmployeeController(BaseEmployeeDbContext db)
+    public EmployeeController(
+        BaseEmployeeDbContext db,
+        IDynamicSearchQueryParser dynamicSearchQueryParser)
     {
         _db = db;
+        _dynamicSearchQueryParser = dynamicSearchQueryParser;
     }
 
     // example query: http://localhost:5154/api/employees/search?firstName_startsWith=Jus&lastName_contains=bourn&department_exact=it&email=justin.fairbourn%40gmail.com&hireDate_startDate=2026-07-01&hireDate_endDate=2026-07-17&yearsOfExperience_gt=5&primaryLanguage_startsWith=C&graduationDate_startDate=2026-06-28&graduationDate_endDate=2026-07-17&level=se1&isFullstackCapable=false&employeeTypeId=af0976b0-83b1-4fb2-b58d-46cbf2bd7137&pageNumber=1&pageSize=20
@@ -227,14 +231,14 @@ public class EmployeeController : ControllerBase
         return query;
     }
 
-    private static List<DynamicSearchFilter> GetDynamicSearchFilters(
+    private List<DynamicSearchFilter> GetDynamicSearchFilters(
         IQueryCollection parameters,
         EmployeeType? employeeType,
         List<string> errors)
     {
         if (employeeType is null)
         {
-            if (DynamicSearchQueryParser.HasDynamicSearchParameters(parameters, DynamicSearchParserOptions))
+            if (_dynamicSearchQueryParser.HasDynamicSearchParameters(parameters, DynamicSearchParserOptions))
             {
                 errors.Add("Dynamic field filters require a valid employeeTypeId query parameter.");
             }
@@ -242,7 +246,7 @@ public class EmployeeController : ControllerBase
             return [];
         }
 
-        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+        DynamicSearchFilterParseResult result = _dynamicSearchQueryParser.Parse(
             parameters,
             employeeType.Fields.Select(ToDynamicSearchField),
             DynamicSearchParserOptions);
