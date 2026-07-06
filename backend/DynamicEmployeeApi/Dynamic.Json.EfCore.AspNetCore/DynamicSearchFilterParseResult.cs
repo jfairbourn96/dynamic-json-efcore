@@ -6,7 +6,7 @@ namespace Dynamic.Json.EfCore.AspNetCore;
 /// Contains the filters and validation errors produced by dynamic search query parsing.
 /// </summary>
 /// <param name="Filters">The successfully parsed dynamic search filters.</param>
-/// <param name="Errors">Validation errors for unsupported or invalid query parameters.</param>
+/// <param name="Errors">Structured validation errors for unsupported or invalid query parameters.</param>
 public sealed record DynamicSearchFilterParseResult(
     IReadOnlyList<DynamicSearchFilter> Filters,
-    IReadOnlyList<string> Errors);
+    IReadOnlyList<DynamicSearchParseError> Errors);

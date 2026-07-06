@@ -37,6 +37,50 @@ public class DynamicSearchQueryParserTests
         { "favoriteSongName", "favoriteSongName_contains", DynamicSearchFieldType.Text, "It Go", SearchOperator.Contains },
     };
 
+    public static TheoryData<string, string, DynamicSearchParseError> InvalidFilterParameters => new()
+    {
+        {
+            "_gt",
+            "7",
+            new DynamicSearchParseError(DynamicSearchParseErrorCode.UnsupportedSearchParameter, "_gt", Value: "7")
+        },
+        {
+            "ice-power",
+            "true",
+            new DynamicSearchParseError(DynamicSearchParseErrorCode.InvalidFieldName, "ice-power", "ice-power", SearchOperator.Exact, "true")
+        },
+        {
+            "snowmanName",
+            "Olaf",
+            new DynamicSearchParseError(DynamicSearchParseErrorCode.UnknownField, "snowmanName", "snowmanName", SearchOperator.Exact, "Olaf")
+        },
+        {
+            "favoriteSongName_gt",
+            "Let It Go",
+            new DynamicSearchParseError(DynamicSearchParseErrorCode.InvalidOperatorForFieldType, "favoriteSongName_gt", "favoriteSongName", SearchOperator.GreaterThan, "Let It Go")
+        },
+        {
+            "numberOfSongs_gte",
+            "seven",
+            new DynamicSearchParseError(DynamicSearchParseErrorCode.InvalidNumberValue, "numberOfSongs_gte", "numberOfSongs", SearchOperator.GreaterThanOrEqual, "seven")
+        },
+        {
+            "coronationDate_startDate",
+            "someday",
+            new DynamicSearchParseError(DynamicSearchParseErrorCode.InvalidDateValue, "coronationDate_startDate", "coronationDate", SearchOperator.StartDate, "someday")
+        },
+        {
+            "hasIcePowers",
+            "onlyInWinter",
+            new DynamicSearchParseError(DynamicSearchParseErrorCode.InvalidBooleanValue, "hasIcePowers", "hasIcePowers", SearchOperator.Exact, "onlyInWinter")
+        },
+        {
+            "kingdom",
+            "Southern Isles",
+            new DynamicSearchParseError(DynamicSearchParseErrorCode.InvalidSelectOptionValue, "kingdom", "kingdom", SearchOperator.Exact, "Southern Isles")
+        },
+    };
+
     [Theory]
     [MemberData(nameof(ValidNumberFilterParameters))]
     [MemberData(nameof(ValidDateFilterParameters))]
@@ -91,14 +135,52 @@ public class DynamicSearchQueryParserTests
     {
         QueryCollection parameters = new(new Dictionary<string, StringValues>
         {
-            ["yearsOfExperience_gte"] = "five",
+            ["numberOfSongs_gte"] = "seven",
         });
 
         DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
             parameters,
-            [new DynamicSearchField("yearsOfExperience", DynamicSearchFieldType.Number)]);
+            [new DynamicSearchField("numberOfSongs", DynamicSearchFieldType.Number)]);
 
         result.Filters.Should().BeEmpty();
-        result.Errors.Should().ContainSingle("Dynamic field 'yearsOfExperience' must be a valid number.");
+        result.Errors.Should().ContainSingle().Which.Should().Be(
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidNumberValue,
+                "numberOfSongs_gte",
+                "numberOfSongs",
+                SearchOperator.GreaterThanOrEqual,
+                "seven"));
+    }
+
+    [Theory]
+    [MemberData(nameof(InvalidFilterParameters))]
+    public void Parse_InvalidParameter_ReturnsDynamicSearchParseError(
+        string queryParamName,
+        string value,
+        DynamicSearchParseError expectedError)
+    {
+        QueryCollection parameters = new(new Dictionary<string, StringValues>
+        {
+            [queryParamName] = value
+        });
+
+        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+            parameters,
+            GetSearchFields());
+
+        result.Filters.Should().BeEmpty();
+        result.Errors.Should().ContainSingle().Which.Should().Be(expectedError);
+    }
+
+    private static DynamicSearchField[] GetSearchFields()
+    {
+        return
+        [
+            new DynamicSearchField("favoriteSongName", DynamicSearchFieldType.Text),
+            new DynamicSearchField("numberOfSongs", DynamicSearchFieldType.Number),
+            new DynamicSearchField("coronationDate", DynamicSearchFieldType.Date),
+            new DynamicSearchField("hasIcePowers", DynamicSearchFieldType.Boolean),
+            new DynamicSearchField("kingdom", DynamicSearchFieldType.Select, ["Arendelle", "Northuldra"]),
+        ];
     }
 }

@@ -247,10 +247,7 @@ public class EmployeeController : ControllerBase
             employeeType.Fields.Select(ToDynamicSearchField),
             DynamicSearchParserOptions);
 
-        errors.AddRange(result.Errors.Select(error => error.Replace(
-            "does not exist.",
-            $"does not exist on employee type '{employeeType.Name}'.",
-            StringComparison.Ordinal)));
+        errors.AddRange(result.Errors.Select(error => FormatDynamicSearchParseError(error, employeeType.Name)));
 
         return [.. result.Filters];
     }
@@ -417,6 +414,32 @@ public class EmployeeController : ControllerBase
         options.IgnoredKeyPrefixes.UnionWith(["firstName_", "lastName_", "department_"]);
 
         return options;
+    }
+
+    private static string FormatDynamicSearchParseError(
+        DynamicSearchParseError error,
+        string employeeTypeName)
+    {
+        return error.Code switch
+        {
+            DynamicSearchParseErrorCode.UnsupportedSearchParameter =>
+                $"Unsupported search parameter '{error.QueryKey}'.",
+            DynamicSearchParseErrorCode.InvalidFieldName =>
+                $"Dynamic field '{error.FieldName}' is not a valid field name.",
+            DynamicSearchParseErrorCode.UnknownField =>
+                $"Dynamic field '{error.FieldName}' does not exist on employee type '{employeeTypeName}'.",
+            DynamicSearchParseErrorCode.InvalidOperatorForFieldType =>
+                $"Search operator '{error.Operator}' is not valid for dynamic field '{error.FieldName}'.",
+            DynamicSearchParseErrorCode.InvalidNumberValue =>
+                $"Dynamic field '{error.FieldName}' must be a valid number.",
+            DynamicSearchParseErrorCode.InvalidDateValue =>
+                $"Dynamic field '{error.FieldName}' must be a valid date.",
+            DynamicSearchParseErrorCode.InvalidBooleanValue =>
+                $"Dynamic field '{error.FieldName}' must be true or false.",
+            DynamicSearchParseErrorCode.InvalidSelectOptionValue =>
+                $"Dynamic field '{error.FieldName}' has an invalid option value.",
+            _ => $"Unsupported search parameter '{error.QueryKey}'.",
+        };
     }
 
     private static string ToPropertyName(string queryFieldName)

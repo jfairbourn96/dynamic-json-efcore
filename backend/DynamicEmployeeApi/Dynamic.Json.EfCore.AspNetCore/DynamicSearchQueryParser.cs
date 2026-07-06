@@ -58,7 +58,7 @@ public static class DynamicSearchQueryParser
             StringComparer.OrdinalIgnoreCase);
 
         List<DynamicSearchFilter> filters = [];
-        List<string> errors = [];
+        List<DynamicSearchParseError> errors = [];
 
         foreach (KeyValuePair<string, StringValues> parameter in parameters)
         {
@@ -71,23 +71,36 @@ public static class DynamicSearchQueryParser
 
             if (!TryParseDynamicFilterKey(parameter.Key, out string fieldName, out SearchOperator searchOperator))
             {
-                errors.Add($"Unsupported search parameter '{parameter.Key}'.");
+                errors.Add(new DynamicSearchParseError(
+                    DynamicSearchParseErrorCode.UnsupportedSearchParameter,
+                    parameter.Key,
+                    Value: value));
                 continue;
             }
 
             if (!SafeDynamicFieldName.IsMatch(fieldName))
             {
-                errors.Add($"Dynamic field '{fieldName}' is not a valid field name.");
+                errors.Add(new DynamicSearchParseError(
+                    DynamicSearchParseErrorCode.InvalidFieldName,
+                    parameter.Key,
+                    fieldName,
+                    searchOperator,
+                    value));
                 continue;
             }
 
             if (!fieldsByName.TryGetValue(fieldName, out DynamicSearchField? field))
             {
-                errors.Add($"Dynamic field '{fieldName}' does not exist.");
+                errors.Add(new DynamicSearchParseError(
+                    DynamicSearchParseErrorCode.UnknownField,
+                    parameter.Key,
+                    fieldName,
+                    searchOperator,
+                    value));
                 continue;
             }
 
-            if (!ValidateDynamicFilter(field, searchOperator, value, errors))
+            if (!ValidateDynamicFilter(parameter.Key, field, searchOperator, value, errors))
             {
                 continue;
             }
@@ -123,10 +136,11 @@ public static class DynamicSearchQueryParser
     }
 
     private static bool ValidateDynamicFilter(
+        string queryKey,
         DynamicSearchField field,
         SearchOperator searchOperator,
         string value,
-        List<string> errors)
+        List<DynamicSearchParseError> errors)
     {
         bool isValidOperator = field.FieldType switch
         {
@@ -140,35 +154,60 @@ public static class DynamicSearchQueryParser
 
         if (!isValidOperator)
         {
-            errors.Add($"Search operator '{searchOperator}' is not valid for dynamic field '{field.Name}'.");
+            errors.Add(new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidOperatorForFieldType,
+                queryKey,
+                field.Name,
+                searchOperator,
+                value));
             return false;
         }
 
         if (field.FieldType == DynamicSearchFieldType.Number &&
             !decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out _))
         {
-            errors.Add($"Dynamic field '{field.Name}' must be a valid number.");
+            errors.Add(new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidNumberValue,
+                queryKey,
+                field.Name,
+                searchOperator,
+                value));
             return false;
         }
 
         if (field.FieldType == DynamicSearchFieldType.Date &&
             !DateOnly.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
         {
-            errors.Add($"Dynamic field '{field.Name}' must be a valid date.");
+            errors.Add(new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidDateValue,
+                queryKey,
+                field.Name,
+                searchOperator,
+                value));
             return false;
         }
 
         if (field.FieldType == DynamicSearchFieldType.Boolean &&
             !bool.TryParse(value, out _))
         {
-            errors.Add($"Dynamic field '{field.Name}' must be true or false.");
+            errors.Add(new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidBooleanValue,
+                queryKey,
+                field.Name,
+                searchOperator,
+                value));
             return false;
         }
 
         if (field.FieldType == DynamicSearchFieldType.Select &&
             !field.Options.Any(option => option.Equals(value, StringComparison.Ordinal)))
         {
-            errors.Add($"Dynamic field '{field.Name}' has an invalid option value.");
+            errors.Add(new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidSelectOptionValue,
+                queryKey,
+                field.Name,
+                searchOperator,
+                value));
             return false;
         }
 
