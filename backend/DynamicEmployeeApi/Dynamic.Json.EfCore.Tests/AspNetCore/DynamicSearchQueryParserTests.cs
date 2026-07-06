@@ -81,6 +81,63 @@ public class DynamicSearchQueryParserTests
         },
     };
 
+    public static TheoryData<QueryCollection, DynamicSearchQueryParserOptions?, bool> DynamicSearchParameterPresence => new()
+    {
+        { new QueryCollection(), null, false },
+        { CreateQueryCollection("favoriteSongName", "   "), null, false },
+        { CreateQueryCollection("pageNumber", "1"), CreateParserOptions(ignoredKeys: ["pageNumber"]), false },
+        { CreateQueryCollection("core_name", "Elsa"), CreateParserOptions(ignoredKeyPrefixes: ["core_"]), false },
+        { CreateQueryCollection("favoriteSongName", "Into The Unknown"), null, true },
+    };
+
+    public static TheoryData<string, string, DynamicSearchField, DynamicSearchParseError> InvalidFieldTypeValues => new()
+    {
+        {
+            "numberOfSongs_gte",
+            "seven",
+            new DynamicSearchField("numberOfSongs", DynamicSearchFieldType.Number),
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidNumberValue,
+                "numberOfSongs_gte",
+                "numberOfSongs",
+                SearchOperator.GreaterThanOrEqual,
+                "seven")
+        },
+        {
+            "coronationDate_startDate",
+            "someday",
+            new DynamicSearchField("coronationDate", DynamicSearchFieldType.Date),
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidDateValue,
+                "coronationDate_startDate",
+                "coronationDate",
+                SearchOperator.StartDate,
+                "someday")
+        },
+        {
+            "hasIcePowers",
+            "concealDontFeel",
+            new DynamicSearchField("hasIcePowers", DynamicSearchFieldType.Boolean),
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidBooleanValue,
+                "hasIcePowers",
+                "hasIcePowers",
+                SearchOperator.Exact,
+                "concealDontFeel")
+        },
+        {
+            "kingdom",
+            "Southern Isles",
+            new DynamicSearchField("kingdom", DynamicSearchFieldType.Select, ["Arendelle", "Northuldra"]),
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidSelectOptionValue,
+                "kingdom",
+                "kingdom",
+                SearchOperator.Exact,
+                "Southern Isles")
+        },
+    };
+
     [Theory]
     [MemberData(nameof(ValidNumberFilterParameters))]
     [MemberData(nameof(ValidDateFilterParameters))]
@@ -130,26 +187,25 @@ public class DynamicSearchQueryParserTests
         ]);
     }
 
-    [Fact]
-    public void Parse_InvalidFieldTypeValue_ReturnsValidationError()
+    [Theory]
+    [MemberData(nameof(InvalidFieldTypeValues))]
+    public void Parse_InvalidFieldTypeValue_ReturnsValidationError(
+        string queryParamName,
+        string value,
+        DynamicSearchField field,
+        DynamicSearchParseError expectedError)
     {
         QueryCollection parameters = new(new Dictionary<string, StringValues>
         {
-            ["numberOfSongs_gte"] = "seven",
+            [queryParamName] = value,
         });
 
         DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
             parameters,
-            [new DynamicSearchField("numberOfSongs", DynamicSearchFieldType.Number)]);
+            [field]);
 
         result.Filters.Should().BeEmpty();
-        result.Errors.Should().ContainSingle().Which.Should().Be(
-            new DynamicSearchParseError(
-                DynamicSearchParseErrorCode.InvalidNumberValue,
-                "numberOfSongs_gte",
-                "numberOfSongs",
-                SearchOperator.GreaterThanOrEqual,
-                "seven"));
+        result.Errors.Should().ContainSingle().Which.Should().Be(expectedError);
     }
 
     [Theory]
@@ -170,6 +226,68 @@ public class DynamicSearchQueryParserTests
 
         result.Filters.Should().BeEmpty();
         result.Errors.Should().ContainSingle().Which.Should().Be(expectedError);
+    }
+
+    [Fact]
+    public void Parse_IgnoredParameters_DoesNotReturnFiltersOrErrors()
+    {
+        QueryCollection parameters = new(new Dictionary<string, StringValues>
+        {
+            ["pageNumber"] = "1",
+            ["core_name"] = "Elsa",
+            ["favoriteSongName"] = "   ",
+        });
+
+        DynamicSearchQueryParserOptions options = CreateParserOptions(
+            ignoredKeys: ["pageNumber"],
+            ignoredKeyPrefixes: ["core_"]);
+
+        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+            parameters,
+            GetSearchFields(),
+            options);
+
+        result.Filters.Should().BeEmpty();
+        result.Errors.Should().BeEmpty();
+    }
+
+    [Theory]
+    [MemberData(nameof(DynamicSearchParameterPresence))]
+    public void HasDynamicSearchParameters_ReturnsWhetherQueryContainsNonIgnoredParameters(
+        QueryCollection parameters,
+        DynamicSearchQueryParserOptions? options,
+        bool expectedResult)
+    {
+        bool result = DynamicSearchQueryParser.HasDynamicSearchParameters(parameters, options);
+
+        result.Should().Be(expectedResult);
+    }
+
+    private static QueryCollection CreateQueryCollection(string key, string value)
+    {
+        return new QueryCollection(new Dictionary<string, StringValues>
+        {
+            [key] = value
+        });
+    }
+
+    private static DynamicSearchQueryParserOptions CreateParserOptions(
+        string[]? ignoredKeys = null,
+        string[]? ignoredKeyPrefixes = null)
+    {
+        DynamicSearchQueryParserOptions options = new();
+
+        if (ignoredKeys is not null)
+        {
+            options.IgnoredKeys.UnionWith(ignoredKeys);
+        }
+
+        if (ignoredKeyPrefixes is not null)
+        {
+            options.IgnoredKeyPrefixes.UnionWith(ignoredKeyPrefixes);
+        }
+
+        return options;
     }
 
     private static DynamicSearchField[] GetSearchFields()
