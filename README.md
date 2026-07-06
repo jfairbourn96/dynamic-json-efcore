@@ -1,14 +1,11 @@
-# Dynamic HR in EF Core
+# Dynamic.Json.EfCore
 
-Dynamic HR in EF Core is a proof-of-concept HR records system built with .NET 10, EF Core, SQL Server, and React. The project explores a common product problem: how to support user-defined fields, dynamic forms, and dynamic search without creating a new database column for every custom field.
+Dynamic.Json.EfCore is a package-oriented .NET repository for mapping, tracking, validating, and querying dynamic JSON values with EF Core.
 
-The backend stores employee-specific custom field values as JSON and uses reusable `Dynamic.Json.EfCore.*` packages to map, track, validate, and query those JSON values through EF Core.
+The package set is designed for applications that store user-defined or schema-flexible fields as JSON while still wanting strongly modeled EF Core configuration, change tracking, query validation, and provider-specific SQL translation.
 
 ## Highlights
 
-- Dynamic employee type definitions with custom field schemas.
-- Employee records with structured JSON field values.
-- Runtime-generated forms and search filters in React.
 - Provider-neutral JSON mapping/query primitives for EF Core.
 - SQL Server-specific EF Core translation package for JSON query functions.
 - ASP.NET Core query-string parsing package for dynamic search filters.
@@ -18,21 +15,13 @@ The backend stores employee-specific custom field values as JSON and uses reusab
 ## Repository Layout
 
 ```text
-backend/DynamicEmployeeApi/
-  Dynamic.Json.EfCore/                 Provider-neutral JSON mapping, tracking, and query markers
-  Dynamic.Json.EfCore.AspNetCore/      ASP.NET Core dynamic search query parsing
-  Dynamic.Json.EfCore.SqlServer/       SQL Server EF Core JSON query translations
-  Dynamic.Json.EfCore.UnitTests/       Unit tests for the Dynamic.Json.EfCore package set
-  Dynamic.Json.EfCore.IntegrationTests/Integration test shell for future Docker-backed provider tests
-  Dynamic.Employees.Core/              Domain models and enums
-  Dynamic.Employees.Data/              EF Core DbContext and data configuration
-  EmployeeApi/                         ASP.NET Core API
-
-frontend/
-  src/                                 React UI for employee types, forms, and search
-
-docs/
-  test-coverage.md                     Current test coverage notes for Dynamic.Json.EfCore packages
+Dynamic.Json.EfCore/                  Provider-neutral JSON mapping, tracking, and query markers
+Dynamic.Json.EfCore.AspNetCore/       ASP.NET Core dynamic search query parsing
+Dynamic.Json.EfCore.SqlServer/        SQL Server EF Core JSON query translations
+Dynamic.Json.EfCore.UnitTests/        Unit tests for the package set
+Dynamic.Json.EfCore.IntegrationTests/ Integration test shell for future Docker-backed provider tests
+docs/                                 Package documentation and test coverage notes
+TODO.md                               Follow-up work and publishing checklist
 ```
 
 ## Dynamic.Json.EfCore Packages
@@ -143,37 +132,26 @@ options.UseSqlServer(connectionString)
 
 The translator uses EF Core SQL expression APIs instead of raw SQL string concatenation. Store type fragments used by `TRY_CONVERT` are fixed internally, and user values are kept in EF expression translation.
 
-## Running the Project
+## Building
 
-Backend:
-
-```powershell
-dotnet build backend\DynamicEmployeeApi\DynamicEmployeeApi.sln
-dotnet run --project backend\DynamicEmployeeApi\EmployeeApi\EmployeeApi.csproj
-```
-
-Frontend:
+Build the package solution:
 
 ```powershell
-cd frontend
-npm install
-npm run dev
+dotnet build Dynamic.Json.EfCore.slnx
 ```
-
-The API is configured for SQL Server LocalDB by default in `EmployeeApi/appsettings.json`. Update the `DefaultConnection` connection string as needed for your environment.
 
 ## Tests
 
 Unit tests:
 
 ```powershell
-dotnet test backend\DynamicEmployeeApi\Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj
+dotnet test Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj
 ```
 
 Integration test shell:
 
 ```powershell
-dotnet test backend\DynamicEmployeeApi\Dynamic.Json.EfCore.IntegrationTests\Dynamic.Json.EfCore.IntegrationTests.csproj
+dotnet test Dynamic.Json.EfCore.IntegrationTests\Dynamic.Json.EfCore.IntegrationTests.csproj
 ```
 
 The current integration project contains a placeholder. Docker/Testcontainers-backed SQL Server tests are tracked in `TODO.md`.
@@ -188,7 +166,7 @@ Coverage notes for the package set live in `docs/test-coverage.md`.
 - Package vulnerability checks are part of the review workflow:
 
 ```powershell
-dotnet list backend\DynamicEmployeeApi\DynamicEmployeeApi.sln package --vulnerable --include-transitive
+dotnet list Dynamic.Json.EfCore.slnx package --vulnerable --include-transitive
 ```
 
 ## Roadmap
