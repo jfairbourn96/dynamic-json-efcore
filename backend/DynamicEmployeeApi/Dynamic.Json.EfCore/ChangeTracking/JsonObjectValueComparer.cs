@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Dynamic.Json.EfCore;
+namespace Dynamic.Json.EfCore.ChangeTracking;
 
 public class JsonObjectValueComparer() : ValueComparer<JsonObject>((a, b) => Serialize(a) == Serialize(b),
     v => v == null ? 0 : Serialize(v).GetHashCode(),

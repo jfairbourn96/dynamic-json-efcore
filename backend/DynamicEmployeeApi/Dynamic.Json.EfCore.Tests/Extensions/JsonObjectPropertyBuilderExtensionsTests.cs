@@ -1,5 +1,5 @@
 using System.Text.Json.Nodes;
-using Dynamic.Json.EfCore;
+using Dynamic.Json.EfCore.Metadata;
 using FluentAssertions;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;

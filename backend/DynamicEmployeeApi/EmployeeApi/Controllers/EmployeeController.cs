@@ -3,10 +3,11 @@
 // exercise the FieldValues JsonObject conversion and ValueComparer configs.
 
 using System.Globalization;
-using System.Text.RegularExpressions;
 using Dynamic.Employees.Core.Models;
 using Dynamic.Employees.Data;
-using Dynamic.Json.EfCore;
+using Dynamic.Json.EfCore.AspNetCore;
+using Dynamic.Json.EfCore.Querying;
+using Dynamic.Json.EfCore.Search;
 using DynamicEmployee.Core.Enums;
 using EmployeeApi.Requests;
 using Microsoft.AspNetCore.Mvc;
@@ -20,9 +21,7 @@ namespace EmployeeApi.Controllers;
 public class EmployeeController : ControllerBase
 {
     private readonly BaseEmployeeDbContext _db;
-    private static readonly Regex SafeDynamicFieldName = new(
-        "^[A-Za-z][A-Za-z0-9_]*$",
-        RegexOptions.Compiled | RegexOptions.CultureInvariant);
+    private static readonly DynamicSearchQueryParserOptions DynamicSearchParserOptions = CreateDynamicSearchParserOptions();
 
     public EmployeeController(BaseEmployeeDbContext db)
     {
@@ -67,10 +66,7 @@ public class EmployeeController : ControllerBase
             }
         }
 
-        List<DynamicSearchFilter> dynamicFilters = GetDynamicSearchFilters(
-            Request.Query,
-            employeeType,
-            errors);
+        List<DynamicSearchFilter> dynamicFilters = GetDynamicSearchFilters(Request.Query, employeeType, errors);
 
         if (errors.Count > 0)
         {
@@ -236,64 +232,27 @@ public class EmployeeController : ControllerBase
         EmployeeType? employeeType,
         List<string> errors)
     {
-        List<DynamicSearchFilter> filters = [];
-        bool needsEmployeeType = false;
-
-        foreach (KeyValuePair<string, StringValues> parameter in parameters)
+        if (employeeType is null)
         {
-            if (IsKnownNonDynamicQueryKey(parameter.Key))
+            if (DynamicSearchQueryParser.HasDynamicSearchParameters(parameters, DynamicSearchParserOptions))
             {
-                continue;
+                errors.Add("Dynamic field filters require a valid employeeTypeId query parameter.");
             }
 
-            string? value = parameter.Value.FirstOrDefault()?.Trim();
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                continue;
-            }
-
-            if (!TryParseDynamicFilterKey(parameter.Key, out string fieldName, out SearchOperator searchOperator))
-            {
-                errors.Add($"Unsupported search parameter '{parameter.Key}'.");
-                continue;
-            }
-
-            needsEmployeeType = true;
-
-            if (employeeType is null)
-            {
-                continue;
-            }
-
-            if (!SafeDynamicFieldName.IsMatch(fieldName))
-            {
-                errors.Add($"Dynamic field '{fieldName}' is not a valid field name.");
-                continue;
-            }
-
-            EmployeeTypeField? field = employeeType.Fields
-                .SingleOrDefault(f => f.Name.Equals(fieldName, StringComparison.OrdinalIgnoreCase));
-
-            if (field is null)
-            {
-                errors.Add($"Dynamic field '{fieldName}' does not exist on employee type '{employeeType.Name}'.");
-                continue;
-            }
-
-            if (!ValidateDynamicFilter(field, searchOperator, value, errors))
-            {
-                continue;
-            }
-
-            filters.Add(new DynamicSearchFilter(field, searchOperator, value));
+            return [];
         }
 
-        if (needsEmployeeType && employeeType is null)
-        {
-            errors.Add("Dynamic field filters require a valid employeeTypeId query parameter.");
-        }
+        DynamicSearchFilterParseResult result = DynamicSearchQueryParser.Parse(
+            parameters,
+            employeeType.Fields.Select(ToDynamicSearchField),
+            DynamicSearchParserOptions);
 
-        return filters;
+        errors.AddRange(result.Errors.Select(error => error.Replace(
+            "does not exist.",
+            $"does not exist on employee type '{employeeType.Name}'.",
+            StringComparison.Ordinal)));
+
+        return [.. result.Filters];
     }
 
     private static IQueryable<Employee> ApplyDynamicFilters(
@@ -302,15 +261,15 @@ public class EmployeeController : ControllerBase
     {
         foreach (DynamicSearchFilter filter in filters)
         {
-            string path = ToJsonPath(filter.Field.Name);
+            string path = ToJsonPath(filter.FieldName);
 
-            query = filter.Field.FieldType switch
+            query = filter.FieldType switch
             {
-                FieldType.Text or FieldType.Address => ApplyDynamicTextFilter(query, path, filter),
-                FieldType.Number => ApplyDynamicNumberFilter(query, path, filter),
-                FieldType.Date => ApplyDynamicDateFilter(query, path, filter),
-                FieldType.Boolean => ApplyDynamicBooleanFilter(query, path, filter),
-                FieldType.Select => ApplyDynamicSelectFilter(query, path, filter),
+                DynamicSearchFieldType.Text => ApplyDynamicTextFilter(query, path, filter),
+                DynamicSearchFieldType.Number => ApplyDynamicNumberFilter(query, path, filter),
+                DynamicSearchFieldType.Date => ApplyDynamicDateFilter(query, path, filter),
+                DynamicSearchFieldType.Boolean => ApplyDynamicBooleanFilter(query, path, filter),
+                DynamicSearchFieldType.Select => ApplyDynamicSelectFilter(query, path, filter),
                 _ => query,
             };
         }
@@ -325,11 +284,11 @@ public class EmployeeController : ControllerBase
     {
         if (filter.Operator == SearchOperator.Exact)
         {
-            return query.Where(e => JsonDbFunctions.JsonValue(e.FieldValues, path) == filter.Value);
+            return query.Where(e => DynamicJsonFunctions.Value(e.FieldValues, path) == filter.Value);
         }
 
         string pattern = BuildLikePattern(filter.Value, filter.Operator);
-        return query.Where(e => EF.Functions.Like(JsonDbFunctions.JsonValue(e.FieldValues, path)!, pattern, @"\"));
+        return query.Where(e => EF.Functions.Like(DynamicJsonFunctions.Value(e.FieldValues, path)!, pattern, @"\"));
     }
 
     private static IQueryable<Employee> ApplyDynamicNumberFilter(
@@ -341,11 +300,11 @@ public class EmployeeController : ControllerBase
 
         return filter.Operator switch
         {
-            SearchOperator.LessThan => query.Where(e => JsonDbFunctions.JsonValueDecimal(e.FieldValues, path) < number),
-            SearchOperator.LessThanOrEqual => query.Where(e => JsonDbFunctions.JsonValueDecimal(e.FieldValues, path) <= number),
-            SearchOperator.GreaterThan => query.Where(e => JsonDbFunctions.JsonValueDecimal(e.FieldValues, path) > number),
-            SearchOperator.GreaterThanOrEqual => query.Where(e => JsonDbFunctions.JsonValueDecimal(e.FieldValues, path) >= number),
-            _ => query.Where(e => JsonDbFunctions.JsonValueDecimal(e.FieldValues, path) == number),
+            SearchOperator.LessThan => query.Where(e => DynamicJsonFunctions.ValueDecimal(e.FieldValues, path) < number),
+            SearchOperator.LessThanOrEqual => query.Where(e => DynamicJsonFunctions.ValueDecimal(e.FieldValues, path) <= number),
+            SearchOperator.GreaterThan => query.Where(e => DynamicJsonFunctions.ValueDecimal(e.FieldValues, path) > number),
+            SearchOperator.GreaterThanOrEqual => query.Where(e => DynamicJsonFunctions.ValueDecimal(e.FieldValues, path) >= number),
+            _ => query.Where(e => DynamicJsonFunctions.ValueDecimal(e.FieldValues, path) == number),
         };
     }
 
@@ -358,8 +317,8 @@ public class EmployeeController : ControllerBase
 
         return filter.Operator switch
         {
-            SearchOperator.StartDate => query.Where(e => JsonDbFunctions.JsonValueDate(e.FieldValues, path) >= date),
-            SearchOperator.EndDate => query.Where(e => JsonDbFunctions.JsonValueDate(e.FieldValues, path) <= date),
+            SearchOperator.StartDate => query.Where(e => DynamicJsonFunctions.ValueDate(e.FieldValues, path) >= date),
+            SearchOperator.EndDate => query.Where(e => DynamicJsonFunctions.ValueDate(e.FieldValues, path) <= date),
             _ => query,
         };
     }
@@ -372,7 +331,7 @@ public class EmployeeController : ControllerBase
         bool boolValue = bool.Parse(filter.Value);
         string jsonValue = boolValue ? "true" : "false";
 
-        return query.Where(e => JsonDbFunctions.JsonValue(e.FieldValues, path) == jsonValue);
+        return query.Where(e => DynamicJsonFunctions.Value(e.FieldValues, path) == jsonValue);
     }
 
     private static IQueryable<Employee> ApplyDynamicSelectFilter(
@@ -380,110 +339,7 @@ public class EmployeeController : ControllerBase
         string path,
         DynamicSearchFilter filter)
     {
-        return query.Where(e => JsonDbFunctions.JsonValue(e.FieldValues, path) == filter.Value);
-    }
-
-    private static bool ValidateDynamicFilter(
-        EmployeeTypeField field,
-        SearchOperator searchOperator,
-        string value,
-        List<string> errors)
-    {
-        bool isValidOperator = field.FieldType switch
-        {
-            FieldType.Text or FieldType.Address => searchOperator is SearchOperator.Contains or SearchOperator.StartsWith or SearchOperator.Exact,
-            FieldType.Number => searchOperator is SearchOperator.LessThan or SearchOperator.LessThanOrEqual or SearchOperator.Exact or SearchOperator.GreaterThan or SearchOperator.GreaterThanOrEqual,
-            FieldType.Date => searchOperator is SearchOperator.StartDate or SearchOperator.EndDate,
-            FieldType.Boolean => searchOperator == SearchOperator.Exact,
-            FieldType.Select => searchOperator == SearchOperator.Exact,
-            _ => false,
-        };
-
-        if (!isValidOperator)
-        {
-            errors.Add($"Search operator '{searchOperator}' is not valid for dynamic field '{field.Name}'.");
-            return false;
-        }
-
-        if (field.FieldType == FieldType.Number &&
-            !decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out _))
-        {
-            errors.Add($"Dynamic field '{field.Name}' must be a valid number.");
-            return false;
-        }
-
-        if (field.FieldType == FieldType.Date &&
-            !DateOnly.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.None, out _))
-        {
-            errors.Add($"Dynamic field '{field.Name}' must be a valid date.");
-            return false;
-        }
-
-        if (field.FieldType == FieldType.Boolean &&
-            !bool.TryParse(value, out _))
-        {
-            errors.Add($"Dynamic field '{field.Name}' must be true or false.");
-            return false;
-        }
-
-        if (field.FieldType == FieldType.Select &&
-            !field.Options.Any(o => o.Value.Equals(value, StringComparison.Ordinal)))
-        {
-            errors.Add($"Dynamic field '{field.Name}' has an invalid option value.");
-            return false;
-        }
-
-        return true;
-    }
-
-    private static bool TryParseDynamicFilterKey(
-        string key,
-        out string fieldName,
-        out SearchOperator searchOperator)
-    {
-        (string Suffix, SearchOperator Operator)[] suffixes =
-        [
-            ("_startsWith", SearchOperator.StartsWith),
-            ("_startDate", SearchOperator.StartDate),
-            ("_endDate", SearchOperator.EndDate),
-            ("_contains", SearchOperator.Contains),
-            ("_exact", SearchOperator.Exact),
-            ("_lte", SearchOperator.LessThanOrEqual),
-            ("_gte", SearchOperator.GreaterThanOrEqual),
-            ("_lt", SearchOperator.LessThan),
-            ("_gt", SearchOperator.GreaterThan),
-        ];
-
-        foreach ((string suffix, SearchOperator filterOperator) in suffixes)
-        {
-            if (key.EndsWith(suffix, StringComparison.Ordinal))
-            {
-                fieldName = key[..^suffix.Length];
-                searchOperator = filterOperator;
-                return !string.IsNullOrWhiteSpace(fieldName);
-            }
-        }
-
-        fieldName = key;
-        searchOperator = SearchOperator.Exact;
-        return !string.IsNullOrWhiteSpace(fieldName);
-    }
-
-    private static bool IsKnownNonDynamicQueryKey(string key)
-    {
-        if (key is "employeeTypeId" or "pageNumber" or "pageSize" or "email")
-        {
-            return true;
-        }
-
-        if (key is "hireDate_startDate" or "hireDate_endDate")
-        {
-            return true;
-        }
-
-        return key.StartsWith("firstName_", StringComparison.Ordinal)
-            || key.StartsWith("lastName_", StringComparison.Ordinal)
-            || key.StartsWith("department_", StringComparison.Ordinal);
+        return query.Where(e => DynamicJsonFunctions.Value(e.FieldValues, path) == filter.Value);
     }
 
     private static string? GetQueryValue(IQueryCollection parameters, string key)
@@ -528,6 +384,41 @@ public class EmployeeController : ControllerBase
 
     private static string ToJsonPath(string fieldName) => "$." + fieldName;
 
+    private static DynamicSearchField ToDynamicSearchField(EmployeeTypeField field)
+    {
+        DynamicSearchFieldType fieldType = field.FieldType switch
+        {
+            FieldType.Text => DynamicSearchFieldType.Text,
+            FieldType.Address => DynamicSearchFieldType.Text,
+            FieldType.Number => DynamicSearchFieldType.Number,
+            FieldType.Date => DynamicSearchFieldType.Date,
+            FieldType.Boolean => DynamicSearchFieldType.Boolean,
+            FieldType.Select => DynamicSearchFieldType.Select,
+            _ => throw new ArgumentOutOfRangeException(nameof(field), field.FieldType, null),
+        };
+
+        return new DynamicSearchField(field.Name, fieldType, field.Options.Select(option => option.Value).ToArray());
+    }
+
+    private static DynamicSearchQueryParserOptions CreateDynamicSearchParserOptions()
+    {
+        DynamicSearchQueryParserOptions options = new();
+
+        options.IgnoredKeys.UnionWith(
+        [
+            "employeeTypeId",
+            "pageNumber",
+            "pageSize",
+            "email",
+            "hireDate_startDate",
+            "hireDate_endDate",
+        ]);
+
+        options.IgnoredKeyPrefixes.UnionWith(["firstName_", "lastName_", "department_"]);
+
+        return options;
+    }
+
     private static string ToPropertyName(string queryFieldName)
     {
         return queryFieldName switch
@@ -539,21 +430,4 @@ public class EmployeeController : ControllerBase
         };
     }
 
-    private enum SearchOperator
-    {
-        Contains,
-        StartsWith,
-        Exact,
-        LessThan,
-        LessThanOrEqual,
-        GreaterThan,
-        GreaterThanOrEqual,
-        StartDate,
-        EndDate,
-    }
-
-    private sealed record DynamicSearchFilter(
-        EmployeeTypeField Field,
-        SearchOperator Operator,
-        string Value);
 }

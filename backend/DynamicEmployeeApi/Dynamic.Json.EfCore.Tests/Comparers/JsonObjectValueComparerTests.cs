@@ -1,5 +1,5 @@
 using System.Text.Json.Nodes;
-using Dynamic.Json.EfCore;
+using Dynamic.Json.EfCore.ChangeTracking;
 using FluentAssertions;
 using Xunit;
 

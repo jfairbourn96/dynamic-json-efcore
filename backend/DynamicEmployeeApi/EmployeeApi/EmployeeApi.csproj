@@ -19,6 +19,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Dynamic.Employees.Core\Dynamic.Employees.Core.csproj" />
       <ProjectReference Include="..\Dynamic.Employees.Data\Dynamic.Employees.Data.csproj" />
+      <ProjectReference Include="..\Dynamic.Json.EfCore.AspNetCore\Dynamic.Json.EfCore.AspNetCore.csproj" />
     </ItemGroup>
 
 </Project>

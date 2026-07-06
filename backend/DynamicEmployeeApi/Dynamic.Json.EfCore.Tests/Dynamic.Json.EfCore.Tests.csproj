@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
+        <Description>Tests for Dynamic.Json.EfCore packages and provider-neutral JSON helpers.</Description>
     </PropertyGroup>
 
     <ItemGroup>
@@ -20,6 +21,11 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Dynamic.Json.EfCore\Dynamic.Json.EfCore.csproj" />
+        <ProjectReference Include="..\Dynamic.Json.EfCore.AspNetCore\Dynamic.Json.EfCore.AspNetCore.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
 
 </Project>
