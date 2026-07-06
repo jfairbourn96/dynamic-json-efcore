@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
 using Xunit;
 
-namespace Dynamic.Json.EfCore.Tests.AspNetCore;
+namespace Dynamic.Json.EfCore.UnitTests.AspNetCore;
 
 public class DynamicSearchQueryParserTests
 {
@@ -385,6 +385,44 @@ public class DynamicSearchQueryParserTests
                 "snowmanName",
                 SearchOperator.Exact,
                 "Olaf"));
+    }
+
+    [Fact]
+    public void Parse_MultipleInvalidParameters_ReturnsAllErrors()
+    {
+        QueryCollection parameters = new(new Dictionary<string, StringValues>
+        {
+            ["snowmanName"] = "Olaf",
+            ["numberOfSongs_gte"] = "seven",
+            ["hasIcePowers"] = "concealDontFeel",
+        });
+
+        DynamicSearchFilterParseResult result = _parser.Parse(
+            parameters,
+            GetSearchFields());
+
+        result.Filters.Should().BeEmpty();
+        result.Errors.Should().BeEquivalentTo(
+        [
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.UnknownField,
+                "snowmanName",
+                "snowmanName",
+                SearchOperator.Exact,
+                "Olaf"),
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidNumberValue,
+                "numberOfSongs_gte",
+                "numberOfSongs",
+                SearchOperator.GreaterThanOrEqual,
+                "seven"),
+            new DynamicSearchParseError(
+                DynamicSearchParseErrorCode.InvalidBooleanValue,
+                "hasIcePowers",
+                "hasIcePowers",
+                SearchOperator.Exact,
+                "concealDontFeel"),
+        ]);
     }
 
     [Fact]

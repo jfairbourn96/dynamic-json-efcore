@@ -3,7 +3,7 @@ using Dynamic.Json.EfCore.Querying;
 using FluentAssertions;
 using Xunit;
 
-namespace Dynamic.Json.EfCore.Tests.Base.Querying;
+namespace Dynamic.Json.EfCore.UnitTests.Base.Querying;
 
 public class DynamicJsonFunctionsTests
 {

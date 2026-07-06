@@ -3,7 +3,7 @@ using Dynamic.Json.EfCore.ChangeTracking;
 using FluentAssertions;
 using Xunit;
 
-namespace Dynamic.Json.EfCore.Tests.Base.Comparers;
+namespace Dynamic.Json.EfCore.UnitTests.Base.Comparers;
 
 public class SerializedJsonObjectValueComparerTests
 {

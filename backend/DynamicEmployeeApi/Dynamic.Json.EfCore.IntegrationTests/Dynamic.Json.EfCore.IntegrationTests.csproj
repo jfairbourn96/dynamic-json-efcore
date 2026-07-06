@@ -5,12 +5,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <IsPackable>false</IsPackable>
-        <Description>Tests for Dynamic.Json.EfCore packages and provider-neutral JSON helpers.</Description>
+        <Description>Integration tests for Dynamic.Json.EfCore packages and provider-specific JSON behavior.</Description>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="FluentAssertions" Version="8.3.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
         <PackageReference Include="xunit" Version="2.9.3" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0">
@@ -21,11 +20,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Dynamic.Json.EfCore\Dynamic.Json.EfCore.csproj" />
-        <ProjectReference Include="..\Dynamic.Json.EfCore.AspNetCore\Dynamic.Json.EfCore.AspNetCore.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <ProjectReference Include="..\Dynamic.Json.EfCore.SqlServer\Dynamic.Json.EfCore.SqlServer.csproj" />
     </ItemGroup>
 
 </Project>

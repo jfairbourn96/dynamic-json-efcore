@@ -2,7 +2,7 @@ using Dynamic.Json.EfCore.Search;
 using FluentAssertions;
 using Xunit;
 
-namespace Dynamic.Json.EfCore.Tests.Base.Search;
+namespace Dynamic.Json.EfCore.UnitTests.Base.Search;
 
 public class DynamicSearchFieldTests
 {
