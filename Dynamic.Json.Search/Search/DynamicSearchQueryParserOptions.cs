@@ -1,4 +1,4 @@
-namespace Dynamic.Json.EfCore.AspNetCore;
+namespace Dynamic.Json.Search;
 
 /// <summary>
 /// Configures how dynamic search query parsing identifies parameters to ignore.

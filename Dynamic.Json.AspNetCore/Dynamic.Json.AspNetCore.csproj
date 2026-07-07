@@ -4,8 +4,8 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PackageId>Dynamic.Json.EfCore.AspNetCore</PackageId>
-        <Description>ASP.NET Core query-string parsing helpers for Dynamic.Json.EfCore search filters.</Description>
+        <PackageId>Dynamic.Json.AspNetCore</PackageId>
+        <Description>ASP.NET Core adapters for Dynamic.Json.Search.</Description>
     </PropertyGroup>
 
     <ItemGroup>
@@ -13,7 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Dynamic.Json.EfCore\Dynamic.Json.EfCore.csproj" />
+        <ProjectReference Include="..\Dynamic.Json.Search\Dynamic.Json.Search.csproj" />
     </ItemGroup>
 
 </Project>

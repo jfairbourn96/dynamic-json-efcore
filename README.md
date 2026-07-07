@@ -7,16 +7,18 @@ The package set is designed for applications that store user-defined or schema-f
 ## Highlights
 
 - Provider-neutral JSON mapping/query primitives for EF Core.
+- Provider-neutral dynamic search filter models and parser.
+- ASP.NET Core adapters for query-string based dynamic search.
 - SQL Server-specific EF Core translation package for JSON query functions.
-- ASP.NET Core query-string parsing package for dynamic search filters.
 - Unit and integration test projects separated by test boundary.
 - Security-conscious query construction using EF expression translation rather than raw SQL string building.
 
 ## Repository Layout
 
 ```text
+Dynamic.Json.Search/                  Provider-neutral dynamic search filter models and parser
 Dynamic.Json.EfCore/                  Provider-neutral JSON mapping, tracking, and query markers
-Dynamic.Json.EfCore.AspNetCore/       ASP.NET Core dynamic search query parsing
+Dynamic.Json.AspNetCore/              ASP.NET Core dynamic search query adapters
 Dynamic.Json.EfCore.SqlServer/        SQL Server EF Core JSON query translations
 Dynamic.Json.EfCore.UnitTests/        Unit tests for the package set
 Dynamic.Json.EfCore.IntegrationTests/ Integration test shell for future Docker-backed provider tests
@@ -24,17 +26,38 @@ docs/                                 Package documentation and test coverage no
 TODO.md                               Follow-up work and publishing checklist
 ```
 
-## Dynamic.Json.EfCore Packages
+## Package Boundaries
 
 The reusable JSON functionality is split into package-sized projects:
 
 | Project | Purpose |
 |---|---|
-| `Dynamic.Json.EfCore` | Provider-neutral primitives for JSON conversion, value comparison, search filter models, and EF query marker functions. |
-| `Dynamic.Json.EfCore.AspNetCore` | Parses ASP.NET Core query-string parameters into validated `DynamicSearchFilter` objects. |
+| `Dynamic.Json.Search` | Provider-neutral dynamic search field/filter models, parser, and parse result/error contracts. |
+| `Dynamic.Json.EfCore` | Provider-neutral EF Core primitives for JSON conversion, value comparison, and EF query marker functions. |
+| `Dynamic.Json.AspNetCore` | Adapts ASP.NET Core query-string collections to the provider-neutral search parser and registers parser services. |
 | `Dynamic.Json.EfCore.SqlServer` | Translates provider-neutral JSON query functions into SQL Server functions such as `JSON_VALUE` and `TRY_CONVERT`. |
 
-This split keeps the base package free of SQL Server and ASP.NET Core concerns, while leaving room for future provider packages such as PostgreSQL and future JSON object models such as Newtonsoft `JObject`.
+This split keeps the base search model free of ASP.NET Core, EF Core, and SQL Server concerns. Application layers can depend on `Dynamic.Json.Search`, API layers can opt into `Dynamic.Json.AspNetCore`, and infrastructure layers can choose the EF/provider package they need.
+
+## Design Decisions
+
+`Dynamic.Json.Search` owns the search language. Search fields, operators, parsed filters, parse results, and parse errors are not EF-specific concepts, so they live in a package that can be used by application services, workers, tests, or non-HTTP entry points.
+
+`Dynamic.Json.AspNetCore` is an adapter package. It can translate `IQueryCollection` into the provider-neutral parser input and register ASP.NET Core services, but it should not become the place where business validation or database querying lives.
+
+`Dynamic.Json.EfCore` owns EF Core primitives that are not database-provider-specific: JSON conversion, value comparison, and marker functions used in LINQ expressions.
+
+`Dynamic.Json.EfCore.SqlServer` owns SQL Server translation. SQL Server details such as `JSON_VALUE`, `TRY_CONVERT`, and store type fragments stay out of the provider-neutral EF package. Future providers can be added as sibling packages instead of changing application code that only knows about search criteria.
+
+A typical clean architecture dependency chain looks like this:
+
+```text
+Application -> Dynamic.Json.Search
+API         -> Dynamic.Json.AspNetCore
+Data        -> Dynamic.Json.EfCore.SqlServer
+```
+
+That shape lets an application parse and validate search criteria without taking a dependency on ASP.NET Core or EF Core. The repository/infrastructure layer receives validated filters and decides how to translate them for the selected database provider.
 
 ## JSON Mapping and Change Tracking
 
@@ -96,7 +119,7 @@ Use semantic comparison when JSON object property order should not matter. Use s
 
 ## Dynamic Search
 
-The ASP.NET Core parser converts query-string keys into typed dynamic filters. For example:
+The provider-neutral parser converts key/value pairs into typed dynamic filters. For example:
 
 ```text
 favoriteSongName_contains=Go
@@ -112,6 +135,8 @@ The parser validates:
 - ignored framework/application query parameters such as paging keys
 
 Errors are returned as structured parse errors with stable error codes, allowing API consumers to format or localize messages without relying on exception text.
+
+ASP.NET Core applications can use `Dynamic.Json.AspNetCore` to adapt `IQueryCollection` into the provider-neutral parser. Non-HTTP applications can pass dictionaries or other simple key/value inputs directly to `Dynamic.Json.Search`.
 
 ## SQL Server Translation
 
@@ -153,6 +178,14 @@ Integration test shell:
 ```powershell
 dotnet test Dynamic.Json.EfCore.IntegrationTests\Dynamic.Json.EfCore.IntegrationTests.csproj
 ```
+
+Coverage:
+
+```powershell
+dotnet test Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj --settings coverlet.runsettings --results-directory artifacts\coverage\raw --collect "XPlat Code Coverage"
+```
+
+CI generates an HTML/Cobertura coverage report from the unit test suite, publishes the Markdown summary to the GitHub Actions job summary, and uploads the full report as a `coverage-report` artifact. The integration project currently contains a placeholder, so it is not included in the default coverage report until it has real provider tests.
 
 The current integration project contains a placeholder. Docker/Testcontainers-backed SQL Server tests are tracked in `TODO.md`.
 

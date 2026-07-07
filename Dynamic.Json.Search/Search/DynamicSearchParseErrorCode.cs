@@ -1,4 +1,4 @@
-namespace Dynamic.Json.EfCore.AspNetCore;
+namespace Dynamic.Json.Search;
 
 /// <summary>
 /// Identifies the reason a dynamic search query parameter could not be parsed.

@@ -1,4 +1,4 @@
-namespace Dynamic.Json.EfCore.Search;
+namespace Dynamic.Json.Search;
 
 /// <summary>
 /// Describes a searchable JSON field and the values allowed when the field is option-backed.

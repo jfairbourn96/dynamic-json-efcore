@@ -1,4 +1,4 @@
-namespace Dynamic.Json.EfCore.Search;
+namespace Dynamic.Json.Search;
 
 /// <summary>
 /// Defines the supported comparison operations for dynamic search filters.

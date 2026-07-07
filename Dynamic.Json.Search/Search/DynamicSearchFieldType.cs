@@ -1,4 +1,4 @@
-namespace Dynamic.Json.EfCore.Search;
+namespace Dynamic.Json.Search;
 
 /// <summary>
 /// Describes the value shape used when validating and applying a dynamic search field.

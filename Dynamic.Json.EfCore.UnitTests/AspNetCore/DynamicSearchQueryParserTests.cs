@@ -1,5 +1,5 @@
-using Dynamic.Json.EfCore.Search;
-using Dynamic.Json.EfCore.AspNetCore;
+using Dynamic.Json.Search;
+using Dynamic.Json.AspNetCore;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -426,11 +426,11 @@ public class DynamicSearchQueryParserTests
     }
 
     [Fact]
-    public void AddDynamicJsonEfCoreAspNetCore_RegistersDynamicSearchQueryParser()
+    public void AddDynamicJsonAspNetCore_RegistersDynamicSearchQueryParser()
     {
         ServiceCollection services = new();
 
-        services.AddDynamicJsonEfCoreAspNetCore();
+        services.AddDynamicJsonAspNetCore();
 
         using ServiceProvider provider = services.BuildServiceProvider();
         IDynamicSearchQueryParser parser = provider.GetRequiredService<IDynamicSearchQueryParser>();

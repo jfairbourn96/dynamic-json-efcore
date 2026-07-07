@@ -1,6 +1,4 @@
-using Dynamic.Json.EfCore.Search;
-
-namespace Dynamic.Json.EfCore.AspNetCore;
+namespace Dynamic.Json.Search;
 
 /// <summary>
 /// Describes a dynamic search query parsing or validation error.

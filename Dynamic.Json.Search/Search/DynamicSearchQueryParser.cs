@@ -1,13 +1,10 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
-using Dynamic.Json.EfCore.Search;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Primitives;
 
-namespace Dynamic.Json.EfCore.AspNetCore;
+namespace Dynamic.Json.Search;
 
 /// <summary>
-/// Default parser for ASP.NET Core query-string parameters into dynamic search filters.
+/// Default parser for request-independent parameters into dynamic search filters.
 /// </summary>
 public sealed class DynamicSearchQueryParser : IDynamicSearchQueryParser
 {
@@ -28,28 +25,17 @@ public sealed class DynamicSearchQueryParser : IDynamicSearchQueryParser
         ("_gt", SearchOperator.GreaterThan),
     ];
 
-    /// <summary>
-    /// Determines whether the query string contains any non-ignored dynamic search parameters.
-    /// </summary>
-    /// <param name="parameters">The query-string parameters to inspect.</param>
-    /// <param name="options">Optional parser settings for ignored keys and prefixes.</param>
-    /// <returns><see langword="true" /> when at least one non-empty dynamic search parameter is present.</returns>
+    /// <inheritdoc />
     public bool HasDynamicSearchParameters(
-        IQueryCollection parameters,
+        IReadOnlyDictionary<string, string?> parameters,
         DynamicSearchQueryParserOptions? options = null)
     {
         return parameters.Any(parameter => IsDynamicSearchParameter(parameter, options));
     }
 
-    /// <summary>
-    /// Parses query-string parameters into validated dynamic search filters.
-    /// </summary>
-    /// <param name="parameters">The query-string parameters to parse.</param>
-    /// <param name="fields">The searchable field definitions used for validation.</param>
-    /// <param name="options">Optional parser settings for ignored keys and prefixes.</param>
-    /// <returns>A parse result containing valid filters and validation errors.</returns>
+    /// <inheritdoc />
     public DynamicSearchFilterParseResult Parse(
-        IQueryCollection parameters,
+        IReadOnlyDictionary<string, string?> parameters,
         IEnumerable<DynamicSearchField> fields,
         DynamicSearchQueryParserOptions? options = null)
     {
@@ -60,14 +46,14 @@ public sealed class DynamicSearchQueryParser : IDynamicSearchQueryParser
         List<DynamicSearchFilter> filters = [];
         List<DynamicSearchParseError> errors = [];
 
-        foreach (KeyValuePair<string, StringValues> parameter in parameters)
+        foreach (KeyValuePair<string, string?> parameter in parameters)
         {
             if (!IsDynamicSearchParameter(parameter, options))
             {
                 continue;
             }
 
-            string value = parameter.Value.FirstOrDefault()?.Trim() ?? string.Empty;
+            string value = parameter.Value?.Trim() ?? string.Empty;
 
             if (!TryParseDynamicFilterKey(parameter.Key, out string fieldName, out SearchOperator searchOperator))
             {
@@ -112,7 +98,7 @@ public sealed class DynamicSearchQueryParser : IDynamicSearchQueryParser
     }
 
     private static bool IsDynamicSearchParameter(
-        KeyValuePair<string, StringValues> parameter,
+        KeyValuePair<string, string?> parameter,
         DynamicSearchQueryParserOptions? options)
     {
         if (IsIgnoredKey(parameter.Key, options))
@@ -120,7 +106,7 @@ public sealed class DynamicSearchQueryParser : IDynamicSearchQueryParser
             return false;
         }
 
-        string? value = parameter.Value.FirstOrDefault()?.Trim();
+        string? value = parameter.Value?.Trim();
         return !string.IsNullOrWhiteSpace(value);
     }
 
