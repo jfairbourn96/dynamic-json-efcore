@@ -43,4 +43,13 @@ jobs:
           user: ${{ vars.NUGET_USER }}
 
       - name: Publish
-        run: dotnet nuget push artifacts/packages\*.nupkg --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        shell: pwsh
+        run: |
+          $packages = @(Get-ChildItem artifacts/packages -Filter *.nupkg)
+          if ($packages.Count -eq 0) {
+            throw "No NuGet packages found in artifacts/packages."
+          }
+
+          $packages | ForEach-Object {
+            dotnet nuget push $_.FullName --api-key "${{ steps.nuget-login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
