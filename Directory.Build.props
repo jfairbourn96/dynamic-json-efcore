@@ -9,6 +9,6 @@
         <RepositoryType>git</RepositoryType>
         <PackageTags>ef-core;json;dynamic-fields;querying;aspnetcore;sqlserver</PackageTags>
         <PackageReadmeFile>README.md</PackageReadmeFile>
-        <Version>0.1.0-preview.1</Version>
+        <Version>0.2.0-preview.1</Version>
     </PropertyGroup>
 </Project>

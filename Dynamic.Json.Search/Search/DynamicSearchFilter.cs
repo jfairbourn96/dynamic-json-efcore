@@ -1,4 +1,4 @@
-namespace Dynamic.Json.EfCore.Search;
+namespace Dynamic.Json.Search;
 
 /// <summary>
 /// Represents a validated search condition against a dynamic JSON field.

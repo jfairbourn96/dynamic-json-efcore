@@ -7,9 +7,24 @@ This checklist tracks meaningful test coverage for the `Dynamic.Json.EfCore.*` p
 Last verified with:
 
 ```text
-dotnet test Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj --no-restore
-Passed: 66, Failed: 0, Skipped: 0
+dotnet test Dynamic.Json.EfCore.slnx --no-restore
+Passed: 67, Failed: 0, Skipped: 0
 ```
+
+Coverage collection:
+
+```text
+dotnet test Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj --settings coverlet.runsettings --results-directory artifacts\coverage\raw --collect "XPlat Code Coverage"
+```
+
+Current unit-test product-code baseline:
+
+```text
+Line coverage: 96.19%
+Branch coverage: 87.50%
+```
+
+The default coverage report excludes test assemblies and the placeholder integration project. Add integration/provider coverage to the CI report when the SQL Server integration tests are implemented.
 
 ## Coverage Matrix
 

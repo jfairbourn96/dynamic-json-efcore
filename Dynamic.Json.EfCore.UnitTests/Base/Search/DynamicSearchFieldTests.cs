@@ -1,4 +1,4 @@
-using Dynamic.Json.EfCore.Search;
+using Dynamic.Json.Search;
 using FluentAssertions;
 using Xunit;
 
