@@ -6,14 +6,22 @@ using Xunit;
 
 namespace Dynamic.Json.EfCore.IntegrationTests.SqlServer;
 
+[Collection(SqlServerContainerCollection.Name)]
 public sealed class SqlServerJsonTranslationTests
 {
+    private readonly SqlServerContainerFixture _fixture;
+
+    public SqlServerJsonTranslationTests(SqlServerContainerFixture fixture)
+    {
+        _fixture = fixture;
+    }
+
     [Fact]
     public void Queries_GenerateExpectedSqlServerJsonTranslation()
     {
         DbContextOptionsBuilder<SqlServerJsonObjectIntegrationTests.TestJsonDbContext> builder =
             new DbContextOptionsBuilder<SqlServerJsonObjectIntegrationTests.TestJsonDbContext>()
-                .UseSqlServer("Server=(localdb)\\mssqllocaldb;Database=DynamicJsonEfCoreSqlGeneration");
+                .UseSqlServer(_fixture.ConnectionString);
 
         builder.UseDynamicJsonSqlServer();
 

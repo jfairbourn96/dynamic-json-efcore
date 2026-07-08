@@ -62,7 +62,7 @@ public sealed class SqlServerJsonObjectIntegrationTests
         await SeedAsync(context);
 
         List<string> names = await context.Records
-            .Where(r => DynamicJsonFunctions.Value(r.Values, "$.department") == "Engineering")
+            .Where(r => DynamicJsonFunctions.Value(r.Values, "$.department") == "HeelerHouse")
             .Select(r => DynamicJsonFunctions.Value(r.Values, "$.name")!)
             .OrderBy(name => name)
             .ToListAsync();
