@@ -21,7 +21,7 @@ Dynamic.Json.EfCore/                  Provider-neutral JSON mapping, tracking, a
 Dynamic.Json.AspNetCore/              ASP.NET Core dynamic search query adapters
 Dynamic.Json.EfCore.SqlServer/        SQL Server EF Core JSON query translations
 Dynamic.Json.EfCore.UnitTests/        Unit tests for the package set
-Dynamic.Json.EfCore.IntegrationTests/ Integration test shell for future Docker-backed provider tests
+Dynamic.Json.EfCore.IntegrationTests/ Docker/Testcontainers-backed SQL Server integration tests
 docs/                                 Package documentation and test coverage notes
 TODO.md                               Follow-up work and publishing checklist
 ```
@@ -157,6 +157,8 @@ options.UseSqlServer(connectionString)
 
 The translator uses EF Core SQL expression APIs instead of raw SQL string concatenation. Store type fragments used by `TRY_CONVERT` are fixed internally, and user values are kept in EF expression translation.
 
+The SQL Server integration tests exercise this behavior against a real SQL Server 2022 container. They verify that `JsonObject` values persist and reload through `HasJsonConversion()`, string lookups translate through `JSON_VALUE`, numeric lookups use `TRY_CONVERT(decimal(18, 4), JSON_VALUE(...))`, date lookups use `TRY_CONVERT(date, JSON_VALUE(...))`, and generated SQL contains the expected SQL Server JSON functions.
+
 ## Building
 
 Build the package solution:
@@ -173,11 +175,13 @@ Unit tests:
 dotnet test Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj
 ```
 
-Integration test shell:
+SQL Server integration tests:
 
 ```powershell
 dotnet test Dynamic.Json.EfCore.IntegrationTests\Dynamic.Json.EfCore.IntegrationTests.csproj
 ```
+
+The integration tests use `Testcontainers.MsSql` and require Docker to be running. The first run may take longer while Docker pulls the SQL Server 2022 image. Each test creates an isolated database from the container connection string, so tests can share one container without sharing data.
 
 Coverage:
 
@@ -185,9 +189,7 @@ Coverage:
 dotnet test Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj --settings coverlet.runsettings --results-directory artifacts\coverage\raw --collect "XPlat Code Coverage"
 ```
 
-CI generates an HTML/Cobertura coverage report from the unit test suite, publishes the Markdown summary to the GitHub Actions job summary, and uploads the full report as a `coverage-report` artifact. The integration project currently contains a placeholder, so it is not included in the default coverage report until it has real provider tests.
-
-The current integration project contains a placeholder. Docker/Testcontainers-backed SQL Server tests are tracked in `TODO.md`.
+CI generates an HTML/Cobertura coverage report from the unit test suite, publishes the Markdown summary to the GitHub Actions job summary, and uploads the full report as a `coverage-report` artifact. A separate GitHub Actions job runs the SQL Server integration tests on `ubuntu-latest`, where Testcontainers can start the SQL Server container through Docker.
 
 Coverage notes for the package set live in `docs/test-coverage.md`.
 
@@ -206,8 +208,6 @@ dotnet list Dynamic.Json.EfCore.slnx package --vulnerable --include-transitive
 
 Near-term follow-up work is tracked in `TODO.md`, including:
 
-- Docker-backed SQL Server integration tests.
-- Provider translation tests outside the unit test project.
 - Future PostgreSQL support.
 - Future Newtonsoft/JObject support.
 - Swagger/OpenAPI documentation after selecting a package version without known vulnerabilities.
