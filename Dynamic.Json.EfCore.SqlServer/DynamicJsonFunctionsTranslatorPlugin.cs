@@ -3,29 +3,26 @@ using System.Text.Json.Nodes;
 using Dynamic.Json.EfCore.Querying;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
-using Microsoft.EntityFrameworkCore.SqlServer.Infrastructure.Internal;
-using Microsoft.EntityFrameworkCore.SqlServer.Query.Internal;
 
 namespace Dynamic.Json.EfCore.SqlServer;
 
 /// <summary>
-/// SQL Server method-call translator provider that adds translations for Dynamic.Json.EfCore functions.
+/// SQL Server method-call translator plugin that adds translations for Dynamic.Json.EfCore functions.
 /// </summary>
-public sealed class DynamicJsonSqlServerMethodCallTranslatorProvider : SqlServerMethodCallTranslatorProvider
+public sealed class DynamicJsonSqlServerMethodCallTranslatorPlugin : IMethodCallTranslatorPlugin
 {
     /// <summary>
-    /// Creates a translator provider for Dynamic.Json.EfCore SQL Server JSON functions.
+    /// Creates a translator plugin for Dynamic.Json.EfCore SQL Server JSON functions.
     /// </summary>
-    public DynamicJsonSqlServerMethodCallTranslatorProvider(
-        RelationalMethodCallTranslatorProviderDependencies dependencies,
-        ISqlServerSingletonOptions sqlServerSingletonOptions)
-        : base(dependencies, sqlServerSingletonOptions)
+    public DynamicJsonSqlServerMethodCallTranslatorPlugin(ISqlExpressionFactory sqlExpressionFactory)
     {
-        AddTranslators([new DynamicJsonFunctionsTranslator(dependencies.SqlExpressionFactory)]);
+        Translators = [new DynamicJsonFunctionsTranslator(sqlExpressionFactory)];
     }
+
+    /// <inheritdoc />
+    public IEnumerable<IMethodCallTranslator> Translators { get; }
 }
 
 internal sealed class DynamicJsonFunctionsTranslator : IMethodCallTranslator
