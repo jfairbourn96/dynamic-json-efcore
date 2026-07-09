@@ -24,7 +24,7 @@ Line coverage: 96.19%
 Branch coverage: 87.50%
 ```
 
-The default coverage report excludes test assemblies and the placeholder integration project. Add integration/provider coverage to the CI report when the SQL Server integration tests are implemented.
+The default coverage report excludes test assemblies and the SQL Server integration project. Integration tests run in a separate CI job because they require Docker/Testcontainers and a real SQL Server container.
 
 ## Coverage Matrix
 
@@ -32,14 +32,14 @@ The default coverage report excludes test assemblies and the placeholder integra
 |---|---|---|---|
 | `Dynamic.Json.EfCore` | Semantic JSON comparison | Covered | Equality, property-order behavior, nested objects, arrays, nulls, hashing, snapshots. |
 | `Dynamic.Json.EfCore` | Serialized JSON comparison | Covered | Serialized equality, property-order sensitivity, nulls, hashing, snapshots. |
-| `Dynamic.Json.EfCore` | `HasJsonConversion()` | Unit covered | Default semantic comparer and explicit serialized comparer are verified through EF model metadata. Persistence round trips belong in integration tests. |
+| `Dynamic.Json.EfCore` | `HasJsonConversion()` | Covered | Default semantic comparer and explicit serialized comparer are verified through EF model metadata. SQL Server persistence round trips are covered by integration tests. |
 | `Dynamic.Json.EfCore` | Query marker functions | Covered | Direct invocation throws for `Value`, `ValueDecimal`, and `ValueDate`. |
 | `Dynamic.Json.EfCore` | Search records/enums | Mostly covered | `DynamicSearchField` default options are covered. Other records/enums are simple contracts and covered indirectly through parser tests. |
 | `Dynamic.Json.EfCore.AspNetCore` | Dynamic search query parsing | Covered | Happy paths, select fields, invalid operators, invalid values, unknown fields, ignored parameters, mixed valid/invalid input, multiple errors. |
 | `Dynamic.Json.EfCore.AspNetCore` | Parser service registration | Covered | `AddDynamicJsonEfCoreAspNetCore()` resolves `IDynamicSearchQueryParser`. |
-| `Dynamic.Json.EfCore.SqlServer` | Provider registration | Planned integration/provider coverage | Track in `TODO.md`; requires SQL Server provider configuration. |
-| `Dynamic.Json.EfCore.SqlServer` | SQL translation | Planned integration/provider coverage | Track in `TODO.md`; `ToQueryString()` tests should live outside the unit test project. |
-| `Dynamic.Json.EfCore.SqlServer` | Runtime SQL behavior | Planned integration coverage | `Dynamic.Json.EfCore.IntegrationTests` exists with a placeholder; Docker/Testcontainers implementation is tracked in `TODO.md`. |
+| `Dynamic.Json.EfCore.SqlServer` | Provider registration | Integration covered | SQL Server integration contexts call `UseDynamicJsonSqlServer()` against the real provider. |
+| `Dynamic.Json.EfCore.SqlServer` | SQL translation | Integration covered | `ToQueryString()` verifies `JSON_VALUE`, `TRY_CONVERT(decimal(18, 4), ...)`, and `TRY_CONVERT(date, ...)` output. |
+| `Dynamic.Json.EfCore.SqlServer` | Runtime SQL behavior | Integration covered | Docker/Testcontainers-backed SQL Server tests cover persistence, string JSON lookup, numeric conversion/search, and date conversion/search. |
 
 ## Future Coverage Triggers
 

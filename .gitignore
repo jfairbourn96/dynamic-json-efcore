@@ -21,3 +21,6 @@ Thumbs.db
 
 # Local package outputs
 artifacts/
+
+# Local planning notes
+TODOSHORTTERM.md
