@@ -29,9 +29,9 @@ public sealed class SqlServerJsonTranslationTests
 
         string sql = context.Records
             .Where(r =>
-                DynamicJsonFunctions.Value(r.Values, "$.department") == "HeelerHouse" &&
-                DynamicJsonFunctions.ValueDecimal(r.Values, "$.score") >= 90m &&
-                DynamicJsonFunctions.ValueDate(r.Values, "$.startDate") >= new DateOnly(2024, 1, 1))
+                DynamicJsonFunctions.Value(r.Values, "$.color") == "orange" &&
+                DynamicJsonFunctions.ValueDecimal(r.Values, "$.age") >= 7m &&
+                DynamicJsonFunctions.ValueDate(r.Values, "$.birthday") >= new DateOnly(2018, 1, 1))
             .ToQueryString();
 
         sql.Should().Contain("JSON_VALUE");

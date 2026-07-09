@@ -32,11 +32,13 @@ public sealed class SqlServerJsonObjectIntegrationTests
             Values = new JsonObject
             {
                 ["name"] = "Bluey",
-                ["score"] = 42.75m,
-                ["active"] = true,
+                ["color"] = "blue",
+                ["age"] = 7,
+                ["birthday"] = "2018-10-01",
+                ["isHeeler"] = true,
                 ["metadata"] = new JsonObject
                 {
-                    ["tier"] = "heeler",
+                    ["breed"] = "heeler",
                     ["visits"] = 3
                 }
             }
@@ -48,9 +50,11 @@ public sealed class SqlServerJsonObjectIntegrationTests
         TestJsonRecord record = await reloadContext.Records.SingleAsync(r => r.Id == id);
 
         record.Values["name"]!.GetValue<string>().Should().Be("Bluey");
-        record.Values["score"]!.GetValue<decimal>().Should().Be(42.75m);
-        record.Values["active"]!.GetValue<bool>().Should().BeTrue();
-        record.Values["metadata"]!["tier"]!.GetValue<string>().Should().Be("heeler");
+        record.Values["color"]!.GetValue<string>().Should().Be("blue");
+        record.Values["age"]!.GetValue<int>().Should().Be(7);
+        record.Values["birthday"]!.GetValue<string>().Should().Be("2018-10-01");
+        record.Values["isHeeler"]!.GetValue<bool>().Should().BeTrue();
+        record.Values["metadata"]!["breed"]!.GetValue<string>().Should().Be("heeler");
         record.Values["metadata"]!["visits"]!.GetValue<int>().Should().Be(3);
     }
 
@@ -62,12 +66,12 @@ public sealed class SqlServerJsonObjectIntegrationTests
         await SeedAsync(context);
 
         List<string> names = await context.Records
-            .Where(r => DynamicJsonFunctions.Value(r.Values, "$.department") == "HeelerHouse")
+            .Where(r => DynamicJsonFunctions.Value(r.Values, "$.color") == "orange")
             .Select(r => DynamicJsonFunctions.Value(r.Values, "$.name")!)
             .OrderBy(name => name)
             .ToListAsync();
 
-        names.Should().Equal("Bluey", "Bingo");
+        names.Should().Equal("Bingo", "Chilli");
     }
 
     [Fact]
@@ -78,12 +82,12 @@ public sealed class SqlServerJsonObjectIntegrationTests
         await SeedAsync(context);
 
         List<string> names = await context.Records
-            .Where(r => DynamicJsonFunctions.ValueDecimal(r.Values, "$.score") >= 90m)
+            .Where(r => DynamicJsonFunctions.ValueDecimal(r.Values, "$.age") >= 7m)
             .Select(r => DynamicJsonFunctions.Value(r.Values, "$.name")!)
             .OrderBy(name => name)
             .ToListAsync();
 
-        names.Should().Equal("Bluey", "Bingo");
+        names.Should().Equal("Bluey", "Chilli");
     }
 
     [Fact]
@@ -94,12 +98,12 @@ public sealed class SqlServerJsonObjectIntegrationTests
         await SeedAsync(context);
 
         List<string> names = await context.Records
-            .Where(r => DynamicJsonFunctions.ValueDate(r.Values, "$.startDate") >= new DateOnly(2024, 1, 1))
+            .Where(r => DynamicJsonFunctions.ValueDate(r.Values, "$.birthday") >= new DateOnly(2018, 1, 1))
             .Select(r => DynamicJsonFunctions.Value(r.Values, "$.name")!)
             .OrderBy(name => name)
             .ToListAsync();
 
-        names.Should().Equal("Bluey", "Chilli");
+        names.Should().Equal("Bingo", "Bluey");
     }
 
     private TestJsonDbContext CreateContext()
@@ -129,23 +133,23 @@ public sealed class SqlServerJsonObjectIntegrationTests
     private static async Task SeedAsync(TestJsonDbContext context)
     {
         context.Records.AddRange(
-            CreateRecord("Bluey", "HeelerHouse", 98.50m, "2024-01-15"),
-            CreateRecord("Bingo", "HeelerHouse", 91m, "2023-12-01"),
-            CreateRecord("Chilli", "GrownUps", 85.25m, "2024-06-30"));
+            CreateRecord("Bluey", "blue", 7, "2018-10-01"),
+            CreateRecord("Bingo", "orange", 5, "2020-05-12"),
+            CreateRecord("Chilli", "orange", 35, "1988-03-18"));
 
         await context.SaveChangesAsync();
     }
 
-    private static TestJsonRecord CreateRecord(string name, string department, decimal score, string startDate)
+    private static TestJsonRecord CreateRecord(string name, string color, int age, string birthday)
         => new()
         {
             Id = Guid.NewGuid(),
             Values = new JsonObject
             {
                 ["name"] = name,
-                ["department"] = department,
-                ["score"] = score,
-                ["startDate"] = startDate
+                ["color"] = color,
+                ["age"] = age,
+                ["birthday"] = birthday
             }
         };
 
