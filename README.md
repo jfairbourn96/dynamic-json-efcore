@@ -109,18 +109,34 @@ The current package version is `0.2.1-preview.1` and targets `.NET 10`.
 ```csharp
 using Dynamic.Json.Metadata;
 
-var metadata = new DynamicMetadataDefinition(new[]
+DynamicFieldDefinition[] fields =
 {
-    new DynamicFieldDefinition("displayName", DynamicFieldType.Text, required: true),
+    new DynamicFieldDefinition("displayName", DynamicFieldType.Text, Required: true),
     new DynamicFieldDefinition("skills", DynamicFieldType.JsonArray,
-        elementType: DynamicFieldType.Text),
+        ElementType: DynamicFieldType.Text),
     new DynamicFieldDefinition("certifications", DynamicFieldType.JsonArray,
-        elementType: DynamicFieldType.Select,
-        options: new[] { "azure", "aws" }),
-});
+        ElementType: DynamicFieldType.Select,
+        Options: new[] { "azure", "aws" }),
+};
+
+DynamicMetadataValidationResult validation = DynamicMetadataValidator.Validate(fields);
+if (!validation.IsValid)
+{
+    foreach (DynamicMetadataValidationError error in validation.Errors)
+    {
+        Console.WriteLine($"{error.Code} at {error.Path}: {error.Message}");
+    }
+}
 ```
 
-Definitions serialize with `System.Text.Json` and are validated during construction and deserialization. Arrays require a scalar element type; nested arrays are not currently supported. Select fields require unique, non-blank options, options cannot be attached to other types, and field names must be non-blank and unique within a metadata definition.
+Field collections serialize directly as JSON arrays with `System.Text.Json`. Validation is explicit and returns all failures with stable error codes, metadata paths, and human-readable messages instead of using exceptions for expected invalid input. Arrays require a scalar element type; nested arrays are not currently supported. Select fields require unique, non-blank options, options cannot be attached to other types, and field names must be non-blank and unique within a metadata collection.
+
+For startup or other fail-fast workflows, explicitly opt into exception behavior. The exception retains the complete validation result:
+
+```csharp
+IReadOnlyCollection<DynamicFieldDefinition?> validated =
+    DynamicMetadataValidator.ValidateAndThrow(fields);
+```
 
 ## Quick Start
 
