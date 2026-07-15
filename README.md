@@ -1,6 +1,7 @@
 # Dynamic.Json.EfCore
 
 [![CI](https://github.com/jfairbourn96/dynamic-json-efcore/actions/workflows/ci.yml/badge.svg)](https://github.com/jfairbourn96/dynamic-json-efcore/actions/workflows/ci.yml)
+[![Dynamic.Json.Metadata](https://img.shields.io/nuget/vpre/Dynamic.Json.Metadata?label=Dynamic.Json.Metadata)](https://www.nuget.org/packages/Dynamic.Json.Metadata)
 [![Dynamic.Json.Search](https://img.shields.io/nuget/vpre/Dynamic.Json.Search?label=Dynamic.Json.Search)](https://www.nuget.org/packages/Dynamic.Json.Search)
 [![Dynamic.Json.EfCore](https://img.shields.io/nuget/vpre/Dynamic.Json.EfCore?label=Dynamic.Json.EfCore)](https://www.nuget.org/packages/Dynamic.Json.EfCore)
 [![Dynamic.Json.EfCore.SqlServer](https://img.shields.io/nuget/vpre/Dynamic.Json.EfCore.SqlServer?label=Dynamic.Json.EfCore.SqlServer)](https://www.nuget.org/packages/Dynamic.Json.EfCore.SqlServer)
@@ -58,7 +59,7 @@ flowchart LR
 
     subgraph Core["Core Packages"]
         C["Dynamic.Json.Search<br/>Search Parser"]
-        D["Metadata Definitions"]
+        D["Dynamic.Json.Metadata<br/>Metadata Definitions"]
         E["Expression Builder"]
     end
 
@@ -84,6 +85,7 @@ Incoming query parameters are parsed into strongly typed search criteria, valida
 Install the package for the layer you are building:
 
 ```powershell
+dotnet add package Dynamic.Json.Metadata
 dotnet add package Dynamic.Json.Search
 dotnet add package Dynamic.Json.EfCore
 dotnet add package Dynamic.Json.EfCore.SqlServer
@@ -92,12 +94,33 @@ dotnet add package Dynamic.Json.AspNetCore
 
 | Package | Use it for |
 |---|---|
+| [`Dynamic.Json.Metadata`](https://www.nuget.org/packages/Dynamic.Json.Metadata) | Provider-neutral runtime field definitions, metadata serialization contracts, and structural validation. |
 | [`Dynamic.Json.Search`](https://www.nuget.org/packages/Dynamic.Json.Search) | Provider-neutral dynamic search field/filter models, parser, and parse result/error contracts. |
 | [`Dynamic.Json.EfCore`](https://www.nuget.org/packages/Dynamic.Json.EfCore) | Provider-neutral EF Core primitives for JSON conversion, value comparison, and EF query marker functions. |
 | [`Dynamic.Json.EfCore.SqlServer`](https://www.nuget.org/packages/Dynamic.Json.EfCore.SqlServer) | SQL Server translation for provider-neutral JSON query functions such as string, decimal, and date lookups. |
 | [`Dynamic.Json.AspNetCore`](https://www.nuget.org/packages/Dynamic.Json.AspNetCore) | ASP.NET Core query-string adapters and service registration for dynamic search parsing. |
 
 The current package version is `0.2.1-preview.1` and targets `.NET 10`.
+
+## Runtime Metadata
+
+`Dynamic.Json.Metadata` provides provider-neutral runtime field definitions. Scalar metadata remains concise, while a `JsonArray` declares the scalar type of each element:
+
+```csharp
+using Dynamic.Json.Metadata;
+
+var metadata = new DynamicMetadataDefinition(new[]
+{
+    new DynamicFieldDefinition("displayName", DynamicFieldType.Text, required: true),
+    new DynamicFieldDefinition("skills", DynamicFieldType.JsonArray,
+        elementType: DynamicFieldType.Text),
+    new DynamicFieldDefinition("certifications", DynamicFieldType.JsonArray,
+        elementType: DynamicFieldType.Select,
+        options: new[] { "azure", "aws" }),
+});
+```
+
+Definitions serialize with `System.Text.Json` and are validated during construction and deserialization. Arrays require a scalar element type; nested arrays are not currently supported. Select fields require unique, non-blank options, options cannot be attached to other types, and field names must be non-blank and unique within a metadata definition.
 
 ## Quick Start
 
@@ -202,11 +225,13 @@ The package set is intentionally split so applications only reference the layers
 flowchart TB
     App["Application"]
 
+    Metadata["Dynamic.Json.Metadata"]
     Search["Dynamic.Json.Search"]
     Asp["Dynamic.Json.AspNetCore"]
     Ef["Dynamic.Json.EfCore"]
     Sql["Dynamic.Json.EfCore.SqlServer"]
 
+    App --> Metadata
     App --> Search
     App --> Asp
     App --> Ef
@@ -218,7 +243,9 @@ flowchart TB
 
 ### Package Responsibilities
 
-- **Dynamic.Json.Search** owns the provider-neutral search language, metadata models, parser, validation, and parse results. These concepts are independent of EF Core or ASP.NET Core and can be used by applications, workers, tests, or other entry points.
+- **Dynamic.Json.Metadata** owns provider-neutral runtime field definitions, metadata serialization contracts, and structural validation. Applications can use it without taking dependencies on search, EF Core, or ASP.NET Core.
+
+- **Dynamic.Json.Search** owns the provider-neutral search language, parser, search-specific validation, and parse results. These concepts are independent of EF Core or ASP.NET Core and can be used by applications, workers, tests, or other entry points.
 
 - **Dynamic.Json.AspNetCore** adapts `IQueryCollection` into the provider-neutral parser input and registers ASP.NET Core services. It contains no business validation or database-specific behavior.
 
@@ -229,6 +256,7 @@ flowchart TB
 ## Repository Layout
 
 ```text
+Dynamic.Json.Metadata/                Provider-neutral runtime metadata models and validation
 Dynamic.Json.Search/                  Provider-neutral dynamic search filter models and parser
 Dynamic.Json.EfCore/                  Provider-neutral JSON mapping, tracking, and query markers
 Dynamic.Json.AspNetCore/              ASP.NET Core dynamic search query adapters
