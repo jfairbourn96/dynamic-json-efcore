@@ -1,0 +1,4 @@
+interface:
+  display_name: "Deliver User Story"
+  short_description: "Implement and verify repository user stories"
+  default_prompt: "Use $deliver-user-story to implement and verify this Dynamic.Json.EfCore user story."
