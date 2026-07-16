@@ -2,6 +2,7 @@
   <Project Path="Dynamic.Json.AspNetCore/Dynamic.Json.AspNetCore.csproj" />
   <Project Path="Dynamic.Json.EfCore.IntegrationTests/Dynamic.Json.EfCore.IntegrationTests.csproj" />
   <Project Path="Dynamic.Json.EfCore.SqlServer/Dynamic.Json.EfCore.SqlServer.csproj" />
+  <Project Path="Dynamic.Json.Metadata/Dynamic.Json.Metadata.csproj" />
   <Project Path="Dynamic.Json.Search/Dynamic.Json.Search.csproj" />
   <Project Path="Dynamic.Json.EfCore.UnitTests/Dynamic.Json.EfCore.UnitTests.csproj" />
   <Project Path="Dynamic.Json.EfCore/Dynamic.Json.EfCore.csproj" />

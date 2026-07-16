@@ -24,6 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Dynamic.Json.Metadata\Dynamic.Json.Metadata.csproj" />
         <ProjectReference Include="..\Dynamic.Json.Search\Dynamic.Json.Search.csproj" />
         <ProjectReference Include="..\Dynamic.Json.EfCore\Dynamic.Json.EfCore.csproj" />
         <ProjectReference Include="..\Dynamic.Json.AspNetCore\Dynamic.Json.AspNetCore.csproj" />
