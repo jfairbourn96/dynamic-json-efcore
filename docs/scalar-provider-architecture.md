@@ -31,6 +31,8 @@ Core must not reference a provider package, `Microsoft.EntityFrameworkCore.Relat
 
 The portable JSON path subset and cross-provider null/conversion behavior are separate contracts. A provider must implement those contracts once defined; the extension boundary here does not grant provider-specific behavior to core or change the existing SQL Server translation.
 
+Future nested JSON collection work should follow the parallel boundaries and productization guidance in [Collection query architecture notes](collection-query-architecture-notes.md).
+
 ## SQL Server compatibility
 
 `Dynamic.Json.EfCore.SqlServer` consumes the shared descriptors and retains ownership of `JSON_VALUE`, `TRY_CONVERT`, SQL Server store types, and `UseDynamicJsonSqlServer()`. Moving method discovery to the shared boundary does not change the generated SQL or public registration API.
