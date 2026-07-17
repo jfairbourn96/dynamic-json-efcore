@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Dynamic.Json.EfCore.SqlServer;
 
@@ -32,6 +33,10 @@ internal sealed class DynamicJsonSqlServerOptionsExtension : IDbContextOptionsEx
     public void ApplyServices(IServiceCollection services)
     {
         services.AddScoped<IMethodCallTranslatorPlugin, DynamicJsonSqlServerMethodCallTranslatorPlugin>();
+        services.Replace(ServiceDescriptor.Scoped<IQueryTranslationPreprocessorFactory,
+            DynamicJsonQueryTranslationPreprocessorFactory>());
+        services.Replace(ServiceDescriptor.Singleton<IQuerySqlGeneratorFactory,
+            DynamicJsonSqlServerQuerySqlGeneratorFactory>());
     }
 
     public void ApplyDefaults(IDbContextOptions options)

@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using System.Linq.Expressions;
 
 namespace Dynamic.Json.EfCore.Querying;
 
@@ -11,6 +12,66 @@ namespace Dynamic.Json.EfCore.Querying;
 /// </remarks>
 public static class DynamicJsonFunctions
 {
+    /// <summary>
+    /// Determines whether any element in a JSON array satisfies a predicate.
+    /// </summary>
+    public static bool ArrayAny(
+        JsonObject json,
+        string path,
+        Expression<Func<JsonFragment, bool>> predicate)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
+    /// <summary>
+    /// Determines whether any element in a top-level JSON array satisfies a predicate.
+    /// </summary>
+    public static bool ArrayAny(
+        JsonArray json,
+        Expression<Func<JsonFragment, bool>> predicate)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
+    /// <summary>
+    /// Determines whether any element in an array within another JSON fragment satisfies a predicate.
+    /// </summary>
+    public static bool ArrayAny(
+        JsonFragment json,
+        string path,
+        Expression<Func<JsonFragment, bool>> predicate)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
+    /// <summary>
+    /// Reads a scalar JSON value from a fragment as text.
+    /// </summary>
+    public static string? Value(JsonFragment json, string path)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
+    /// <summary>
+    /// Reads and converts a scalar JSON value from a fragment to a nullable decimal.
+    /// </summary>
+    public static decimal? ValueDecimal(JsonFragment json, string path)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
+    /// <summary>
+    /// Reads and converts a scalar JSON value from a fragment to a nullable date.
+    /// </summary>
+    public static DateOnly? ValueDate(JsonFragment json, string path)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static JsonFragment Fragment(int scope)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static bool TranslatedArrayAny(JsonObject json, string path, int scope, bool predicate)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static bool TranslatedArrayAny(JsonArray json, string path, int scope, bool predicate)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
+    [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+    public static bool TranslatedArrayAny(JsonFragment json, string path, int scope, bool predicate)
+        => throw new NotSupportedException("Only for use in EF Core queries.");
+
     /// <summary>
     /// Reads a scalar JSON value as text from the supplied JSON path.
     /// </summary>
