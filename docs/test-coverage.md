@@ -34,6 +34,7 @@ The default coverage report excludes test assemblies and the SQL Server integrat
 | `Dynamic.Json.EfCore` | Serialized JSON comparison | Covered | Serialized equality, property-order sensitivity, nulls, hashing, snapshots. |
 | `Dynamic.Json.EfCore` | `HasJsonConversion()` | Covered | Default semantic comparer and explicit serialized comparer are verified through EF model metadata. SQL Server persistence round trips are covered by integration tests. |
 | `Dynamic.Json.EfCore` | Query marker functions | Covered | Direct invocation throws for `Value`, `ValueDecimal`, and `ValueDate`. |
+| `Dynamic.Json.EfCore` | Scalar provider extension boundary | Covered | Unit tests verify stable method descriptors and that core has no relational or SQL Server assembly dependency. |
 | `Dynamic.Json.EfCore` | Search records/enums | Mostly covered | `DynamicSearchField` default options are covered. Other records/enums are simple contracts and covered indirectly through parser tests. |
 | `Dynamic.Json.EfCore.AspNetCore` | Dynamic search query parsing | Covered | Happy paths, select fields, invalid operators, invalid values, unknown fields, ignored parameters, mixed valid/invalid input, multiple errors. |
 | `Dynamic.Json.EfCore.AspNetCore` | Parser service registration | Covered | `AddDynamicJsonEfCoreAspNetCore()` resolves `IDynamicSearchQueryParser`. |
