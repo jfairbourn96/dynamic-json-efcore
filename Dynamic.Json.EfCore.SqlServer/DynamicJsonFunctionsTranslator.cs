@@ -71,9 +71,16 @@ internal sealed class DynamicJsonFunctionsTranslator : IMethodCallTranslator
     /// <returns>An expression that reads the selected scalar value as text.</returns>
     private SqlExpression JsonValue(IReadOnlyList<SqlExpression> arguments)
     {
+        SqlExpression path = arguments[1];
+        if (path is SqlConstantExpression { Value: string constantPath })
+        {
+            path = _sqlExpressionFactory.ApplyDefaultTypeMapping(
+                _sqlExpressionFactory.Constant(DynamicJsonPath.Normalize(constantPath)));
+        }
+
         return _sqlExpressionFactory.Function(
             "JSON_VALUE",
-            arguments,
+            [arguments[0], path],
             nullable: true,
             argumentsPropagateNullability: [true, true],
             typeof(string));
