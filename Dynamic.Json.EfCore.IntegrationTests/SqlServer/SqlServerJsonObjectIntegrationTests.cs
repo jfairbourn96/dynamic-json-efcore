@@ -106,6 +106,38 @@ public sealed class SqlServerJsonObjectIntegrationTests
         names.Should().Equal("Bingo", "Bluey");
     }
 
+    [Fact]
+    public async Task Value_EscapedAndNestedPropertyPaths_FilterAgainstRealSqlServer()
+    {
+        await using TestJsonDbContext context = CreateContext();
+        await context.Database.EnsureCreatedAsync();
+
+        context.Records.Add(new TestJsonRecord
+        {
+            Id = Guid.NewGuid(),
+            Values = new JsonObject
+            {
+                ["stage.name"] = "Rumi",
+                ["huntrix"] = new JsonObject
+                {
+                    ["demon-rank"] = "golden"
+                }
+            }
+        });
+        await context.SaveChangesAsync();
+
+        string escapedPropertyPath = DynamicJsonPath.FromProperty("stage.name");
+        string nestedPropertyPath = DynamicJsonPath.FromProperties("huntrix", "demon-rank");
+
+        TestJsonRecord[] matches = await context.Records
+            .Where(record =>
+                DynamicJsonFunctions.Value(record.Values, escapedPropertyPath) == "Rumi" &&
+                DynamicJsonFunctions.Value(record.Values, nestedPropertyPath) == "golden")
+            .ToArrayAsync();
+
+        matches.Should().ContainSingle();
+    }
+
     private TestJsonDbContext CreateContext()
         => CreateContext(CreateDatabaseConnectionString());
 

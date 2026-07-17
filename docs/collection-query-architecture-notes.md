@@ -110,20 +110,19 @@ This stayed within the SQL Server package and therefore respected the package de
 
 Before committing to that implementation, investigate whether supported EF Core extension points or provider expression APIs can represent the necessary table-valued collection expansion. If service replacement remains necessary, document it as a provider limitation and protect it with compatibility tests.
 
-## Path contract requirements
+## Established path contract
 
-Issue 46 should define paths in a way that supports the later collection shapes without implementing collections itself. The contract should answer:
+Issue 46 established a property-only portable path contract that is intentionally reusable for future collection predicates:
 
-- whether root documents and `JsonFragment` values use the same syntax;
-- whether `$` means the current document or current fragment root;
-- how nested properties are represented;
-- how dots, quotes, brackets, and other special characters in property names are escaped;
-- whether array indexes are supported or explicitly excluded;
-- whether wildcards, recursive descent, filters, and provider-specific operators are rejected;
-- whether paths must be constants or may be query parameters; and
-- whether unsupported paths are rejected by provider-neutral validation or during provider translation.
+- `$` represents the current document and will represent the current `JsonFragment` when fragment scalar overloads are introduced;
+- nested properties use successive dot segments;
+- portable ASCII identifiers can remain unquoted;
+- every other exact property name uses a double-quoted segment with JSON string escaping;
+- `DynamicJsonPath` constructs, parses, validates, and canonicalizes paths from runtime metadata;
+- array indexes, wildcards, recursive descent, filters, bracket notation, and provider-specific modes are rejected; and
+- collection traversal is expressed through separate operations such as `ArrayAny`, not by expanding the scalar path grammar.
 
-SQL Server's ability to pass a path to `OPENJSON(document, path)` is an implementation detail, not the definition of the portable path contract.
+Providers validate constant paths through the core contract. Applications construct runtime/parameterized paths through `DynamicJsonPath` before EF Core parameterization. SQL Server's ability to pass a path to `OPENJSON(document, path)` remains an implementation detail rather than the contract definition.
 
 ## Null and conversion requirements
 

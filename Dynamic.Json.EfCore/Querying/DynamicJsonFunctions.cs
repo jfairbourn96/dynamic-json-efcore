@@ -30,7 +30,7 @@ public static class DynamicJsonFunctions
     /// Reads a scalar JSON value as text from the supplied JSON path.
     /// </summary>
     /// <param name="json">The JSON document expression to read from.</param>
-    /// <param name="path">The JSON path expression to translate.</param>
+    /// <param name="path">A property-only path that follows the <see cref="DynamicJsonPath" /> contract.</param>
     /// <returns>The scalar JSON value as text, or <see langword="null" /> when no value exists.</returns>
     /// <example>
     /// <code>
@@ -45,7 +45,7 @@ public static class DynamicJsonFunctions
     /// Reads and converts a scalar JSON value to a nullable decimal.
     /// </summary>
     /// <param name="json">The JSON document expression to read from.</param>
-    /// <param name="path">The JSON path expression to translate.</param>
+    /// <param name="path">A property-only path that follows the <see cref="DynamicJsonPath" /> contract.</param>
     /// <returns>The converted decimal value, or <see langword="null" /> when conversion fails or no value exists.</returns>
     /// <example>
     /// <code>
@@ -60,7 +60,7 @@ public static class DynamicJsonFunctions
     /// Reads and converts a scalar JSON value to a nullable date.
     /// </summary>
     /// <param name="json">The JSON document expression to read from.</param>
-    /// <param name="path">The JSON path expression to translate.</param>
+    /// <param name="path">A property-only path that follows the <see cref="DynamicJsonPath" /> contract.</param>
     /// <returns>The converted date value, or <see langword="null" /> when conversion fails or no value exists.</returns>
     /// <example>
     /// <code>

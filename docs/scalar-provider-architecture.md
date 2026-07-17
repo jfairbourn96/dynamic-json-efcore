@@ -33,6 +33,10 @@ The portable JSON path subset and cross-provider null/conversion behavior are se
 
 Future nested JSON collection work should follow the parallel boundaries and productization guidance in [Collection query architecture notes](collection-query-architecture-notes.md).
 
+All scalar providers must implement the [Portable scalar JSON path contract](scalar-json-path-contract.md).
+
+Standing security requirements and dated reviews are recorded in [Security](security.md).
+
 ## SQL Server compatibility
 
 `Dynamic.Json.EfCore.SqlServer` consumes the shared descriptors and retains ownership of `JSON_VALUE`, `TRY_CONVERT`, SQL Server store types, and `UseDynamicJsonSqlServer()`. Moving method discovery to the shared boundary does not change the generated SQL or public registration API.
