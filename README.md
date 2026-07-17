@@ -226,6 +226,8 @@ flowchart TB
 
 - **Dynamic.Json.EfCore.SqlServer** translates those provider-neutral marker functions into SQL Server expressions such as `JSON_VALUE` and `TRY_CONVERT`, keeping SQL Server implementation details isolated from the rest of the package set.
 
+See [Scalar provider architecture](docs/scalar-provider-architecture.md) for the core/provider responsibility contract and the extension steps for new scalar providers.
+
 ## Repository Layout
 
 ```text
