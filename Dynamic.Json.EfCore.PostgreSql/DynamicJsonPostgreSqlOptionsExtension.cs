@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dynamic.Json.EfCore.PostgreSql;
@@ -9,7 +10,7 @@ namespace Dynamic.Json.EfCore.PostgreSql;
 /// <remarks>
 /// Instances are added by
 /// <see cref="DynamicJsonPostgreSqlDbContextOptionsBuilderExtensions.UseDynamicJsonPostgreSql" />.
-/// Translation service registration is introduced in a separate story.
+/// PostgreSQL translator plugins are registered only when this extension is present.
 /// </remarks>
 internal sealed class DynamicJsonPostgreSqlOptionsExtension : IDbContextOptionsExtension
 {
@@ -20,12 +21,12 @@ internal sealed class DynamicJsonPostgreSqlOptionsExtension : IDbContextOptionsE
         _info ??= new DynamicJsonPostgreSqlOptionsExtensionInfo(this);
 
     /// <summary>
-    /// Applies services owned by the Dynamic.Json PostgreSQL extension.
+    /// Registers the PostgreSQL method-call translator plugin with EF Core's service collection.
     /// </summary>
     /// <param name="services">The service collection used by EF Core's internal service provider.</param>
-    /// <remarks>No services are required until PostgreSQL translation support is introduced.</remarks>
     public void ApplyServices(IServiceCollection services)
     {
+        services.AddScoped<IMethodCallTranslatorPlugin, DynamicJsonPostgreSqlMethodCallTranslatorPlugin>();
     }
 
     /// <summary>
