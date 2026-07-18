@@ -107,6 +107,75 @@ public sealed class SqlServerJsonObjectIntegrationTests
     }
 
     [Fact]
+    public async Task ScalarValues_NullAndFailedConversions_FollowPortableContract()
+    {
+        await using TestJsonDbContext context = CreateContext();
+        await context.Database.EnsureCreatedAsync();
+
+        Guid validId = Guid.NewGuid();
+        Guid missingId = Guid.NewGuid();
+        Guid jsonNullId = Guid.NewGuid();
+        Guid invalidId = Guid.NewGuid();
+        Guid databaseNullId = Guid.NewGuid();
+
+        context.Records.AddRange(
+            new TestJsonRecord
+            {
+                Id = validId,
+                Values = new JsonObject
+                {
+                    ["text"] = "present",
+                    ["number"] = "12.5",
+                    ["date"] = "2026-07-17"
+                }
+            },
+            new TestJsonRecord { Id = missingId, Values = new JsonObject() },
+            new TestJsonRecord
+            {
+                Id = jsonNullId,
+                Values = new JsonObject
+                {
+                    ["text"] = null,
+                    ["number"] = null,
+                    ["date"] = null
+                }
+            },
+            new TestJsonRecord
+            {
+                Id = invalidId,
+                Values = new JsonObject
+                {
+                    ["number"] = "not-a-decimal",
+                    ["date"] = "not-a-date"
+                }
+            });
+
+        await context.SaveChangesAsync();
+        await context.Database.ExecuteSqlInterpolatedAsync(
+            $"INSERT INTO [Records] ([Id], [Values]) VALUES ({databaseNullId}, NULL)");
+
+        ScalarValues[] values = await context.Records
+            .OrderBy(record => record.Id)
+            .Select(record => new ScalarValues(
+                record.Id,
+                DynamicJsonFunctions.Value(record.Values, "$.text"),
+                DynamicJsonFunctions.ValueDecimal(record.Values, "$.number"),
+                DynamicJsonFunctions.ValueDate(record.Values, "$.date")))
+            .ToArrayAsync();
+
+        values.Single(value => value.Id == validId).Should().Be(
+            new ScalarValues(validId, "present", 12.5m, new DateOnly(2026, 7, 17)));
+        values.Single(value => value.Id == missingId).Should().Be(
+            new ScalarValues(missingId, null, null, null));
+        values.Single(value => value.Id == jsonNullId).Should().Be(
+            new ScalarValues(jsonNullId, null, null, null));
+        values.Single(value => value.Id == invalidId).Should().Be(
+            new ScalarValues(invalidId, null, null, null));
+        values.Single(value => value.Id == databaseNullId).Should().Be(
+            new ScalarValues(databaseNullId, null, null, null));
+    }
+
+    [Fact]
     public async Task Value_EscapedAndNestedPropertyPaths_FilterAgainstRealSqlServer()
     {
         await using TestJsonDbContext context = CreateContext();
@@ -202,7 +271,8 @@ public sealed class SqlServerJsonObjectIntegrationTests
                 entity.HasKey(r => r.Id);
                 entity.Property(r => r.Values)
                     .HasColumnType("nvarchar(max)")
-                    .HasJsonConversion();
+                    .HasJsonConversion()
+                    .IsRequired(false);
             });
         }
     }
@@ -213,4 +283,6 @@ public sealed class SqlServerJsonObjectIntegrationTests
 
         public JsonObject Values { get; set; } = new();
     }
+
+    private sealed record ScalarValues(Guid Id, string? Text, decimal? Number, DateOnly? Date);
 }
