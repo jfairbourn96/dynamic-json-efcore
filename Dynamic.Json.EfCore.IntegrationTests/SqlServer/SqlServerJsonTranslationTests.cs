@@ -18,7 +18,7 @@ public sealed class SqlServerJsonTranslationTests
             .Where(r => DynamicJsonFunctions.Value(r.Values, "$.color") == "orange")
             .ToQueryString();
 
-        sql.Should().Contain("JSON_VALUE");
+        sql.Should().Contain("JSON_VALUE([r].[Values], N'$.color')");
     }
 
     [Fact]
@@ -30,7 +30,8 @@ public sealed class SqlServerJsonTranslationTests
             .Where(r => DynamicJsonFunctions.ValueDecimal(r.Values, "$.age") >= 7m)
             .ToQueryString();
 
-        sql.Should().Contain("TRY_CONVERT(decimal(18, 4), JSON_VALUE");
+        sql.Should().Contain(
+            "TRY_CONVERT(decimal(18, 4), JSON_VALUE([r].[Values], N'$.age'))");
     }
 
     [Fact]
@@ -42,7 +43,8 @@ public sealed class SqlServerJsonTranslationTests
             .Where(r => DynamicJsonFunctions.ValueDate(r.Values, "$.birthday") >= new DateOnly(2018, 1, 1))
             .ToQueryString();
 
-        sql.Should().Contain("TRY_CONVERT(date, JSON_VALUE");
+        sql.Should().Contain(
+            "TRY_CONVERT(date, JSON_VALUE([r].[Values], N'$.birthday'))");
     }
 
     [Fact]

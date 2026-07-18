@@ -13,8 +13,9 @@ public sealed class SqlServerRegistrationTests
     {
         DbContextOptionsBuilder builder = new();
 
-        builder.UseDynamicJsonSqlServer();
+        DbContextOptionsBuilder result = builder.UseDynamicJsonSqlServer();
 
+        result.Should().BeSameAs(builder);
         IDbContextOptionsExtension extension = GetDynamicJsonExtension(builder.Options);
         extension.Info.IsDatabaseProvider.Should().BeFalse();
         extension.Info.LogFragment.Should().Contain("DynamicJsonSqlServer");
