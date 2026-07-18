@@ -31,7 +31,10 @@ public static class DynamicJsonFunctions
     /// </summary>
     /// <param name="json">The JSON document expression to read from.</param>
     /// <param name="path">A property-only path that follows the <see cref="DynamicJsonPath" /> contract.</param>
-    /// <returns>The scalar JSON value as text, or <see langword="null" /> when no value exists.</returns>
+    /// <returns>
+    /// The scalar JSON value as text, or <see langword="null" /> when the property is missing,
+    /// the JSON value is <see langword="null" />, or the database JSON document is <see langword="null" />.
+    /// </returns>
     /// <example>
     /// <code>
     /// IQueryable&lt;Employee&gt; engineers = dbContext.Employees.Where(employee =&gt;
@@ -46,7 +49,11 @@ public static class DynamicJsonFunctions
     /// </summary>
     /// <param name="json">The JSON document expression to read from.</param>
     /// <param name="path">A property-only path that follows the <see cref="DynamicJsonPath" /> contract.</param>
-    /// <returns>The converted decimal value, or <see langword="null" /> when conversion fails or no value exists.</returns>
+    /// <returns>
+    /// The converted decimal value, or <see langword="null" /> when conversion fails, the property
+    /// is missing, the JSON value is <see langword="null" />, or the database JSON document is
+    /// <see langword="null" />.
+    /// </returns>
     /// <example>
     /// <code>
     /// IQueryable&lt;Employee&gt; experiencedEmployees = dbContext.Employees.Where(employee =&gt;
@@ -61,7 +68,11 @@ public static class DynamicJsonFunctions
     /// </summary>
     /// <param name="json">The JSON document expression to read from.</param>
     /// <param name="path">A property-only path that follows the <see cref="DynamicJsonPath" /> contract.</param>
-    /// <returns>The converted date value, or <see langword="null" /> when conversion fails or no value exists.</returns>
+    /// <returns>
+    /// The converted date value, or <see langword="null" /> when conversion fails, the property is
+    /// missing, the JSON value is <see langword="null" />, or the database JSON document is
+    /// <see langword="null" />.
+    /// </returns>
     /// <example>
     /// <code>
     /// DateOnly cutoff = new(2025, 1, 1);

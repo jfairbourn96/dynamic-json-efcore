@@ -33,7 +33,8 @@ The portable JSON path subset and cross-provider null/conversion behavior are se
 
 Future nested JSON collection work should follow the parallel boundaries and productization guidance in [Collection query architecture notes](collection-query-architecture-notes.md).
 
-All scalar providers must implement the [Portable scalar JSON path contract](scalar-json-path-contract.md).
+All scalar providers must implement the [Portable scalar JSON path contract](scalar-json-path-contract.md)
+and the [Scalar null and conversion contract](scalar-null-conversion-contract.md).
 
 Standing security requirements and dated reviews are recorded in [Security](security.md).
 
