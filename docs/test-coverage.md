@@ -43,7 +43,7 @@ The default coverage report excludes test assemblies and the SQL Server integrat
 | `Dynamic.Json.EfCore.SqlServer` | Provider registration boundary | Covered | Docker-free tests verify options metadata, idempotent registration, and the expected translation failure when registration is omitted. |
 | `Dynamic.Json.EfCore.SqlServer` | Portable path translation | Covered | Docker-free SQL generation tests verify nested and escaped properties, runtime path parameters, and unsupported constant-path rejection; a real-provider test verifies escaped and nested property filtering. |
 | `Dynamic.Json.EfCore.SqlServer` | Scalar null and failed-conversion semantics | Integration covered | Docker/Testcontainers-backed SQL Server tests verify missing properties, JSON null, database null, and invalid decimal/date values materialize as null while valid values remain unchanged. |
-| `Dynamic.Json.EfCore.SqlServer` | SQL translation | Integration covered | `ToQueryString()` verifies `JSON_VALUE`, `TRY_CONVERT(decimal(18, 4), ...)`, and `TRY_CONVERT(date, ...)` output. |
+| `Dynamic.Json.EfCore.SqlServer` | SQL translation | Integration covered | `ToQueryString()` verifies the established JSON column/path expressions for `JSON_VALUE`, `TRY_CONVERT(decimal(18, 4), ...)`, and `TRY_CONVERT(date, ...)`; real-provider tests protect scalar filtering behavior. |
 | `Dynamic.Json.EfCore.SqlServer` | Runtime SQL behavior | Integration covered | Docker/Testcontainers-backed SQL Server tests cover persistence, string JSON lookup, numeric conversion/search, and date conversion/search. |
 
 ## Future Coverage Triggers
