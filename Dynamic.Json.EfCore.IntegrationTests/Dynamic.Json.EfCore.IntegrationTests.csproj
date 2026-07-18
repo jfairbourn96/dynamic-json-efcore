@@ -16,6 +16,7 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Testcontainers.MsSql" Version="4.13.0" />
+        <PackageReference Include="Testcontainers.PostgreSql" Version="4.13.0" />
         <PackageReference Include="xunit" Version="2.9.3" />
         <PackageReference Include="xunit.runner.visualstudio" Version="3.1.0">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -25,6 +26,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Dynamic.Json.EfCore\Dynamic.Json.EfCore.csproj" />
+        <ProjectReference Include="..\Dynamic.Json.EfCore.PostgreSql\Dynamic.Json.EfCore.PostgreSql.csproj" />
         <ProjectReference Include="..\Dynamic.Json.EfCore.SqlServer\Dynamic.Json.EfCore.SqlServer.csproj" />
     </ItemGroup>
 
