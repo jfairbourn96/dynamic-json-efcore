@@ -76,10 +76,12 @@ public sealed class PostgreSqlJsonObjectIntegrationTests
     {
         DateOnly threshold = new(2020, 1, 1);
         Guid validId = Guid.NewGuid();
+        string validName = $"Rumi-{validId}";
         Guid missingId = Guid.NewGuid();
         Guid jsonNullId = Guid.NewGuid();
         Guid databaseNullId = Guid.NewGuid();
         Guid invalidId = Guid.NewGuid();
+        Guid[] testIds = [validId, missingId, jsonNullId, databaseNullId, invalidId];
 
         await using (TestJsonDbContext context = CreateContext())
         {
@@ -88,7 +90,7 @@ public sealed class PostgreSqlJsonObjectIntegrationTests
                 new TestJsonRecord
                 {
                     Id = validId,
-                    Values = new JsonObject { ["name"] = "Rumi", ["score"] = "12.50", ["day"] = "2024-06-14" }
+                    Values = new JsonObject { ["name"] = validName, ["score"] = "12.50", ["day"] = "2024-06-14" }
                 },
                 new TestJsonRecord { Id = missingId, Values = new JsonObject() },
                 new TestJsonRecord
@@ -106,27 +108,27 @@ public sealed class PostgreSqlJsonObjectIntegrationTests
         }
 
         await using TestJsonDbContext queryContext = CreateContext();
-        (await queryContext.Records.Where(record =>
-                DynamicJsonFunctions.Value(record.Values, "$.name") == "Rumi")
+        (await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
+                DynamicJsonFunctions.Value(record.Values, "$.name") == validName)
             .Select(record => record.Id).ToArrayAsync()).Should().Equal(validId);
-        (await queryContext.Records.Where(record =>
+        (await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
                 DynamicJsonFunctions.ValueDecimal(record.Values, "$.score") >= 12m)
             .Select(record => record.Id).ToArrayAsync()).Should().Equal(validId);
-        (await queryContext.Records.Where(record =>
+        (await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
                 DynamicJsonFunctions.ValueDate(record.Values, "$.day") >= threshold)
             .Select(record => record.Id).ToArrayAsync()).Should().Equal(validId);
 
-        Guid[] nullTextIds = await queryContext.Records.Where(record =>
+        Guid[] nullTextIds = await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
                 DynamicJsonFunctions.Value(record.Values, "$.name") == null)
             .Select(record => record.Id).ToArrayAsync();
         nullTextIds.Should().BeEquivalentTo([missingId, jsonNullId, databaseNullId, invalidId]);
 
-        Guid[] nullDecimalIds = await queryContext.Records.Where(record =>
+        Guid[] nullDecimalIds = await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
                 DynamicJsonFunctions.ValueDecimal(record.Values, "$.score") == null)
             .Select(record => record.Id).ToArrayAsync();
         nullDecimalIds.Should().BeEquivalentTo([missingId, jsonNullId, databaseNullId, invalidId]);
 
-        Guid[] nullDateIds = await queryContext.Records.Where(record =>
+        Guid[] nullDateIds = await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
                 DynamicJsonFunctions.ValueDate(record.Values, "$.day") == null)
             .Select(record => record.Id).ToArrayAsync();
         nullDateIds.Should().BeEquivalentTo([missingId, jsonNullId, databaseNullId, invalidId]);
