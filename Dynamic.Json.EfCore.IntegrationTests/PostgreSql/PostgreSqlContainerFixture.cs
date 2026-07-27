@@ -1,9 +1,10 @@
+using Dynamic.Json.EfCore.IntegrationTests.ProviderContracts;
 using Testcontainers.PostgreSql;
 using Xunit;
 
 namespace Dynamic.Json.EfCore.IntegrationTests.PostgreSql;
 
-public sealed class PostgreSqlContainerFixture : IAsyncLifetime
+public sealed class PostgreSqlContainerFixture : IAsyncLifetime, IScalarProviderFixture
 {
     private readonly PostgreSqlContainer _container = new PostgreSqlBuilder("postgres:18-alpine")
         .Build();

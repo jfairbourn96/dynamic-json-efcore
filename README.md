@@ -242,6 +242,7 @@ flowchart TB
 - [Scalar provider architecture](docs/scalar-provider-architecture.md) — core/provider responsibilities and the extension process for database providers.
 - [Portable scalar JSON path contract](docs/scalar-json-path-contract.md) — supported property paths, escaping rules, and rejected syntax.
 - [Scalar null and conversion contract](docs/scalar-null-conversion-contract.md) — cross-provider behavior for missing, null, valid, and invalid scalar values.
+- [Cross-provider scalar validation](docs/cross-provider-scalar-validation.md) — shared real-database contracts and provider-specific SQL validation.
 - [Collection query architecture notes](docs/collection-query-architecture-notes.md) — design boundaries and productization requirements for future collection queries.
 - [Security](docs/security.md) — standing security requirements, release gates, and dated security reviews.
 - [Test coverage](docs/test-coverage.md) — current validation inventory and coverage expectations.
