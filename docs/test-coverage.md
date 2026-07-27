@@ -4,11 +4,11 @@ This checklist tracks meaningful test coverage for the `Dynamic.Json.EfCore.*` p
 
 ## Current Test Status
 
-Last verified with:
+Last verified on July 27, 2026 with:
 
 ```text
-dotnet test Dynamic.Json.EfCore.slnx --no-restore
-Passed: 67, Failed: 0, Skipped: 0
+Dynamic.Json.EfCore.UnitTests: Passed: 108, Failed: 0, Skipped: 0
+Dynamic.Json.EfCore.IntegrationTests: Passed: 39, Failed: 0, Skipped: 0
 ```
 
 Coverage collection:
@@ -24,7 +24,9 @@ Line coverage: 96.19%
 Branch coverage: 87.50%
 ```
 
-The default coverage report excludes test assemblies and the SQL Server integration project. Integration tests run in a separate CI job because they require Docker/Testcontainers and a real SQL Server container.
+The default coverage report excludes test assemblies and the provider integration project.
+Integration tests run in a separate CI job because they require Docker/Testcontainers with real
+SQL Server 2022 and PostgreSQL 18 containers.
 
 ## Coverage Matrix
 
@@ -42,6 +44,7 @@ The default coverage report excludes test assemblies and the SQL Server integrat
 | `Dynamic.Json.EfCore.PostgreSql` | Provider registration boundary | Covered | Docker-free tests verify options metadata, idempotent `UseDynamicJsonPostgreSql()` registration, Npgsql composition, scoped translator-plugin lifetime, and isolation from SQL Server registration. |
 | `Dynamic.Json.EfCore.PostgreSql` | NuGet package contract | Covered | Package tests inspect the produced `.nupkg` to verify PostgreSQL metadata, native `jsonb` description, bundled readme, core dependency, and bounded EF Core/Npgsql 10.x compatibility. |
 | `Dynamic.Json.EfCore.PostgreSql` | `jsonb` persistence | Integration covered | PostgreSQL Testcontainers coverage verifies the physical `jsonb` column and raw storage, then materializes populated, empty, and database-null `JsonObject` values through a fresh no-tracking context. |
+| `Dynamic.Json.EfCore.PostgreSql` | Scalar JSON translation | Covered | Docker-free SQL tests verify text, safe decimal/date conversion, portable constant paths, captured path and comparison parameters, registration requirements, and unsupported-path rejection. PostgreSQL Testcontainers coverage verifies valid values plus missing, JSON-null, database-null, and invalid conversion results. |
 | `Dynamic.Json.EfCore.SqlServer` | Provider registration | Integration covered | SQL Server integration contexts call `UseDynamicJsonSqlServer()` against the real provider. |
 | `Dynamic.Json.EfCore.SqlServer` | Provider registration boundary | Covered | Docker-free tests verify options metadata, idempotent registration, and the expected translation failure when registration is omitted. |
 | `Dynamic.Json.EfCore.SqlServer` | Portable path translation | Covered | Docker-free SQL generation tests verify nested and escaped properties, runtime path parameters, and unsupported constant-path rejection; a real-provider test verifies escaped and nested property filtering. |

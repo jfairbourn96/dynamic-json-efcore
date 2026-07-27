@@ -31,7 +31,7 @@ Consider Dynamic.Json.EfCore if you want to:
 - Store user-defined fields in JSON while keeping the rest of your model relational.
 - Generate forms, validation, and search filters from runtime metadata.
 - Execute filtering in SQL instead of loading records into memory.
-- Continue using Entity Framework Core, SQL Server, and strongly typed application code.
+- Continue using Entity Framework Core, SQL Server or PostgreSQL, and strongly typed application code.
 
 It is **not** intended to replace a document database. If your application is primarily document-oriented or your entire schema is dynamic, a native document database may be a better choice.
 
@@ -64,8 +64,8 @@ flowchart LR
 
     subgraph Persistence["Persistence Layer"]
         F["Entity Framework Core"]
-        G["Dynamic.Json.EfCore.SqlServer<br/>SQL Translation"]
-        H["SQL Server JSON"]
+        G["Provider Package<br/>SQL Translation"]
+        H["SQL Server JSON<br/>or PostgreSQL jsonb"]
     end
 
     A --> B
@@ -77,16 +77,22 @@ flowchart LR
     G --> H
 ```
 
-Incoming query parameters are parsed into strongly typed search criteria, validated against runtime metadata, translated into LINQ expression trees, and finally converted into provider-specific SQL that executes directly against SQL Server JSON columns.
+Incoming query parameters are parsed into strongly typed search criteria, validated against runtime metadata, translated into LINQ expression trees, and finally converted into provider-specific SQL that executes directly against SQL Server JSON columns or PostgreSQL `jsonb` columns.
 
 ## Packages
 
-Install the package for the layer you are building:
+Install the packages for the layers you are building, choosing the SQL Server or PostgreSQL provider
+package that matches your database:
 
 ```powershell
 dotnet add package Dynamic.Json.Search
 dotnet add package Dynamic.Json.EfCore
+
+# Choose one database provider:
 dotnet add package Dynamic.Json.EfCore.SqlServer
+# or
+dotnet add package Dynamic.Json.EfCore.PostgreSql
+
 dotnet add package Dynamic.Json.AspNetCore
 ```
 
@@ -95,6 +101,7 @@ dotnet add package Dynamic.Json.AspNetCore
 | [`Dynamic.Json.Search`](https://www.nuget.org/packages/Dynamic.Json.Search) | Provider-neutral dynamic search field/filter models, parser, and parse result/error contracts. |
 | [`Dynamic.Json.EfCore`](https://www.nuget.org/packages/Dynamic.Json.EfCore) | Provider-neutral EF Core primitives for JSON conversion, value comparison, and EF query marker functions. |
 | [`Dynamic.Json.EfCore.SqlServer`](https://www.nuget.org/packages/Dynamic.Json.EfCore.SqlServer) | SQL Server translation for provider-neutral JSON query functions such as string, decimal, and date lookups. |
+| `Dynamic.Json.EfCore.PostgreSql` | PostgreSQL `jsonb` persistence and scalar string, decimal, and date query translation. |
 | [`Dynamic.Json.AspNetCore`](https://www.nuget.org/packages/Dynamic.Json.AspNetCore) | ASP.NET Core query-string adapters and service registration for dynamic search parsing. |
 
 The current package version is `0.2.1-preview.1` and targets `.NET 10`.
@@ -186,13 +193,13 @@ For a full application built around these packages, see [Dynamic HR Demo](https:
 
 ## Engineering Highlights
 
-- Package boundaries keep search parsing, ASP.NET Core adapters, EF Core mapping, and SQL Server translation separate.
-- The search parser is provider-neutral, so application services can validate filters without referencing ASP.NET Core, EF Core, or SQL Server.
-- SQL Server translation uses EF Core SQL expression APIs rather than raw SQL string concatenation.
+- Package boundaries keep search parsing, ASP.NET Core adapters, EF Core mapping, and provider SQL translation separate.
+- The search parser is provider-neutral, so application services can validate filters without referencing ASP.NET Core, EF Core, or a database provider.
+- SQL Server and PostgreSQL translations use EF Core provider expression APIs rather than raw SQL string concatenation.
 - Dynamic field names, operators, number/date/boolean values, and select options are validated before query translation.
 - JSON value comparison supports semantic and serialized modes for different correctness/performance tradeoffs.
-- Unit tests cover provider-neutral behavior; Docker/Testcontainers integration tests verify SQL Server persistence and generated SQL.
-- CI builds, tests, packs, runs vulnerability checks, publishes coverage summaries, and runs SQL Server integration tests.
+- Unit tests cover provider-neutral behavior; Docker/Testcontainers integration tests verify SQL Server and PostgreSQL persistence and generated SQL.
+- CI builds, tests, packs, runs vulnerability checks, publishes coverage summaries, and runs provider integration tests.
 
 ## Package Architecture
 
@@ -206,6 +213,7 @@ flowchart TB
     Asp["Dynamic.Json.AspNetCore"]
     Ef["Dynamic.Json.EfCore"]
     Sql["Dynamic.Json.EfCore.SqlServer"]
+    Pg["Dynamic.Json.EfCore.PostgreSql"]
 
     App --> Search
     App --> Asp
@@ -214,6 +222,7 @@ flowchart TB
     Asp --> Search
     Ef --> Search
     Sql --> Ef
+    Pg --> Ef
 ```
 
 ### Package Responsibilities
@@ -226,9 +235,16 @@ flowchart TB
 
 - **Dynamic.Json.EfCore.SqlServer** translates those provider-neutral marker functions into SQL Server expressions such as `JSON_VALUE` and `TRY_CONVERT`, keeping SQL Server implementation details isolated from the rest of the package set.
 
-See [Scalar provider architecture](docs/scalar-provider-architecture.md) for the core/provider responsibility contract and the extension steps for new scalar providers.
-See [Portable scalar JSON path contract](docs/scalar-json-path-contract.md) for supported property paths, escaping, and unsupported syntax.
-See [Security](docs/security.md) for standing requirements, release gates, and dated security reviews.
+- **Dynamic.Json.EfCore.PostgreSql** maps `JsonObject` values to native `jsonb` columns and translates provider-neutral marker functions with PostgreSQL JSON path and conversion expressions.
+
+## Documentation
+
+- [Scalar provider architecture](docs/scalar-provider-architecture.md) — core/provider responsibilities and the extension process for database providers.
+- [Portable scalar JSON path contract](docs/scalar-json-path-contract.md) — supported property paths, escaping rules, and rejected syntax.
+- [Scalar null and conversion contract](docs/scalar-null-conversion-contract.md) — cross-provider behavior for missing, null, valid, and invalid scalar values.
+- [Collection query architecture notes](docs/collection-query-architecture-notes.md) — design boundaries and productization requirements for future collection queries.
+- [Security](docs/security.md) — standing security requirements, release gates, and dated security reviews.
+- [Test coverage](docs/test-coverage.md) — current validation inventory and coverage expectations.
 
 ## Repository Layout
 
@@ -237,8 +253,9 @@ Dynamic.Json.Search/                  Provider-neutral dynamic search filter mod
 Dynamic.Json.EfCore/                  Provider-neutral JSON mapping, tracking, and query markers
 Dynamic.Json.AspNetCore/              ASP.NET Core dynamic search query adapters
 Dynamic.Json.EfCore.SqlServer/        SQL Server EF Core JSON query translations
+Dynamic.Json.EfCore.PostgreSql/       PostgreSQL EF Core jsonb persistence and query translations
 Dynamic.Json.EfCore.UnitTests/        Unit tests for the package set
-Dynamic.Json.EfCore.IntegrationTests/ Docker/Testcontainers-backed SQL Server integration tests
+Dynamic.Json.EfCore.IntegrationTests/ Docker/Testcontainers-backed provider integration tests
 docs/                                 Package documentation and test coverage notes
 TODO.md                               Follow-up work and publishing checklist
 ```
@@ -322,9 +339,9 @@ Errors are returned as structured parse errors with stable error codes, allowing
 
 ASP.NET Core applications can use `Dynamic.Json.AspNetCore` to adapt `IQueryCollection` into the provider-neutral parser. Non-HTTP applications can pass dictionaries or other simple key/value inputs directly to `Dynamic.Json.Search`.
 
-## SQL Server Translation
+## Provider Translation
 
-`Dynamic.Json.EfCore.SqlServer` translates provider-neutral marker functions into SQL Server expressions:
+Both relational provider packages translate the same provider-neutral marker functions:
 
 ```csharp
 DynamicJsonFunctions.Value(employee.FieldValues, "$.favoriteSongName")
@@ -332,9 +349,34 @@ DynamicJsonFunctions.ValueDecimal(employee.FieldValues, "$.numberOfSongs")
 DynamicJsonFunctions.ValueDate(employee.FieldValues, "$.coronationDate")
 ```
 
+### PostgreSQL
+
+PostgreSQL applications enable `jsonb` persistence and scalar translation with:
+
+```csharp
+using Dynamic.Json.EfCore.PostgreSql;
+
+options.UseNpgsql(connectionString)
+    .UseDynamicJsonPostgreSql();
+```
+
+PostgreSQL translation uses `jsonb_path_query_first` for portable property paths and guards
+numeric/date casts with `pg_input_is_valid`, so missing, JSON-null, database-null, and invalid
+conversion values produce SQL `NULL`.
+
+Captured paths and comparison values remain EF Core parameters. Constant paths are validated
+against the portable scalar JSON path contract before SQL generation.
+
+PostgreSQL 16 or later is required because guarded numeric and date translation depends on
+`pg_input_is_valid`. Integration tests currently run against PostgreSQL 18.
+
+### SQL Server
+
 The SQL Server package plugs into EF Core through:
 
 ```csharp
+using Dynamic.Json.EfCore.SqlServer;
+
 options.UseSqlServer(connectionString)
     .UseDynamicJsonSqlServer();
 ```
@@ -368,13 +410,16 @@ Run unit tests:
 dotnet test Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj
 ```
 
-Run SQL Server integration tests:
+Run provider integration tests:
 
 ```powershell
 dotnet test Dynamic.Json.EfCore.IntegrationTests\Dynamic.Json.EfCore.IntegrationTests.csproj
 ```
 
-The integration tests use `Testcontainers.MsSql` and require Docker to be running. The first run may take longer while Docker pulls the SQL Server 2022 image. Each test creates an isolated database from the container connection string, so tests can share one container without sharing data.
+The integration tests use `Testcontainers.MsSql` and `Testcontainers.PostgreSql` and require Docker
+to be running. The first run may take longer while Docker pulls the SQL Server 2022 and PostgreSQL
+18 images. Tests isolate their records or databases so shared provider containers do not leak state
+between assertions.
 
 Collect coverage:
 
@@ -382,7 +427,7 @@ Collect coverage:
 dotnet test Dynamic.Json.EfCore.UnitTests\Dynamic.Json.EfCore.UnitTests.csproj --settings coverlet.runsettings --results-directory artifacts\coverage\raw --collect "XPlat Code Coverage"
 ```
 
-CI generates an HTML/Cobertura coverage report from the unit test suite, publishes the Markdown summary to the GitHub Actions job summary, uploads the full report as a `coverage-report` artifact, packs the NuGet packages, and runs SQL Server integration tests on `ubuntu-latest`.
+CI generates an HTML/Cobertura coverage report from the unit test suite, publishes the Markdown summary to the GitHub Actions job summary, uploads the full report as a `coverage-report` artifact, packs the NuGet packages, and runs SQL Server and PostgreSQL integration tests on `ubuntu-latest`.
 
 Coverage notes for the package set live in [`docs/test-coverage.md`](docs/test-coverage.md).
 
@@ -391,6 +436,5 @@ Coverage notes for the package set live in [`docs/test-coverage.md`](docs/test-c
 Near-term follow-up work is tracked in [`TODO.md`](TODO.md), including:
 
 - JsonArray support
-- Future PostgreSQL support.
 - Future Newtonsoft/JObject support.
 - Swagger/OpenAPI documentation after selecting a package version without known vulnerabilities.

@@ -19,7 +19,7 @@ A provider package owns:
 - all database-specific dependencies, SQL names, casts, operators, quoting, and diagnostics; and
 - integration tests against the real database engine.
 
-Core must not reference a provider package, `Microsoft.EntityFrameworkCore.Relational`, provider SQL types, or provider service-registration APIs. Provider packages may reference core and the EF Core relational/provider packages they implement. Applications opt in through a provider-package registration extension, such as `UseDynamicJsonSqlServer()`.
+Core must not reference a provider package, `Microsoft.EntityFrameworkCore.Relational`, provider SQL types, or provider service-registration APIs. Provider packages may reference core and the EF Core relational/provider packages they implement. Applications opt in through a provider-package registration extension, such as `UseDynamicJsonSqlServer()` or `UseDynamicJsonPostgreSql()`.
 
 ## Implementing another scalar provider
 
@@ -41,3 +41,14 @@ Standing security requirements and dated reviews are recorded in [Security](secu
 ## SQL Server compatibility
 
 `Dynamic.Json.EfCore.SqlServer` consumes the shared descriptors and retains ownership of `JSON_VALUE`, `TRY_CONVERT`, SQL Server store types, and `UseDynamicJsonSqlServer()`. Moving method discovery to the shared boundary does not change the generated SQL or public registration API.
+
+## PostgreSQL implementation
+
+`Dynamic.Json.EfCore.PostgreSql` consumes the same shared descriptors and owns native `jsonb`
+mapping, `jsonb_path_query_first` extraction, guarded numeric/date conversion, PostgreSQL type
+mappings, and `UseDynamicJsonPostgreSql()`.
+
+Captured paths and comparison values remain EF Core parameters. Constant paths are normalized
+through the provider-neutral path contract before they become PostgreSQL `jsonpath` expressions.
+The provider requires PostgreSQL 16 or later because safe conversion uses `pg_input_is_valid`;
+integration coverage currently targets PostgreSQL 18.

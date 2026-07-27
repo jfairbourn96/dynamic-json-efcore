@@ -48,4 +48,4 @@ Collection traversal will add separate query operations rather than expanding th
 
 ## Provider responsibility
 
-Providers translate the decoded property sequence into their database representation. They must not silently accept unsupported provider-specific syntax through the portable API. SQL Server retains its existing `JSON_VALUE` translation and receives the canonical path for constant expressions.
+Providers translate the decoded property sequence into their database representation. They must not silently accept unsupported provider-specific syntax through the portable API. SQL Server retains its existing `JSON_VALUE` translation and receives the canonical path for constant expressions. PostgreSQL translates the same canonical path through `jsonb_path_query_first`. Captured PostgreSQL paths remain `jsonpath`-typed database parameters; constant paths are normalized before SQL generation.

@@ -115,3 +115,4 @@ Before each release:
 | Date | Scope | Review |
 |---|---|---|
 | 2026-07-17 | Story 46 portable scalar JSON paths and scalar architecture through Story 46 | [Review](security-reviews/2026-07-17-story-46-portable-scalar-json-paths.md) |
+| 2026-07-27 | Feature 42 PostgreSQL scalar query translation through Story 58 | [Review](security-reviews/2026-07-27-feature-42-postgresql-scalar-translation.md) |

@@ -31,7 +31,7 @@ Add integration tests for provider-specific `Dynamic.Json.EfCore.*` behavior usi
 
 ### Future Providers
 
-- Add equivalent Docker-backed tests when PostgreSQL support is introduced.
+- [x] Add equivalent Docker-backed tests for PostgreSQL persistence and scalar translation.
 - Add equivalent integration tests when Newtonsoft/JObject support is introduced.
 
 ## API Documentation
