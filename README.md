@@ -95,6 +95,7 @@ dotnet add package Dynamic.Json.AspNetCore
 | [`Dynamic.Json.Search`](https://www.nuget.org/packages/Dynamic.Json.Search) | Provider-neutral dynamic search field/filter models, parser, and parse result/error contracts. |
 | [`Dynamic.Json.EfCore`](https://www.nuget.org/packages/Dynamic.Json.EfCore) | Provider-neutral EF Core primitives for JSON conversion, value comparison, and EF query marker functions. |
 | [`Dynamic.Json.EfCore.SqlServer`](https://www.nuget.org/packages/Dynamic.Json.EfCore.SqlServer) | SQL Server translation for provider-neutral JSON query functions such as string, decimal, and date lookups. |
+| `Dynamic.Json.EfCore.PostgreSql` | PostgreSQL `jsonb` persistence and scalar string, decimal, and date query translation. |
 | [`Dynamic.Json.AspNetCore`](https://www.nuget.org/packages/Dynamic.Json.AspNetCore) | ASP.NET Core query-string adapters and service registration for dynamic search parsing. |
 
 The current package version is `0.2.1-preview.1` and targets `.NET 10`.
@@ -331,6 +332,17 @@ DynamicJsonFunctions.Value(employee.FieldValues, "$.favoriteSongName")
 DynamicJsonFunctions.ValueDecimal(employee.FieldValues, "$.numberOfSongs")
 DynamicJsonFunctions.ValueDate(employee.FieldValues, "$.coronationDate")
 ```
+
+PostgreSQL applications enable the same provider-neutral marker functions with:
+
+```csharp
+options.UseNpgsql(connectionString)
+    .UseDynamicJsonPostgreSql();
+```
+
+PostgreSQL translation uses `jsonb_path_query_first` for portable property paths and guards
+numeric/date casts with `pg_input_is_valid`, so missing, JSON-null, database-null, and invalid
+conversion values produce SQL `NULL`.
 
 The SQL Server package plugs into EF Core through:
 
