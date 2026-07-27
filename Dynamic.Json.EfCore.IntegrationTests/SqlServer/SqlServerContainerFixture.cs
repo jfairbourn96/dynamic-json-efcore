@@ -1,9 +1,10 @@
+using Dynamic.Json.EfCore.IntegrationTests.ProviderContracts;
 using Testcontainers.MsSql;
 using Xunit;
 
 namespace Dynamic.Json.EfCore.IntegrationTests.SqlServer;
 
-public sealed class SqlServerContainerFixture : IAsyncLifetime
+public sealed class SqlServerContainerFixture : IAsyncLifetime, IScalarProviderFixture
 {
     private readonly MsSqlContainer _container = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
         .Build();
