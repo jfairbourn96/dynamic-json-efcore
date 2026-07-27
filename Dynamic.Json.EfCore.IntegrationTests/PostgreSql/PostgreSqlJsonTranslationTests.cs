@@ -76,6 +76,32 @@ public sealed class PostgreSqlJsonTranslationTests
         sql.Should().MatchRegex(@"jsonb_path_query_first\([^,]+, @[A-Za-z0-9_]+::jsonpath\)");
     }
 
+    [Fact]
+    public void ScalarQueries_CapturedPathsAndComparisonValues_RemainParameterized()
+    {
+        using TestJsonDbContext context = CreateContext();
+        string textPath = DynamicJsonPath.FromProperty("stage.name");
+        string expectedText = "Rumi";
+        string decimalPath = DynamicJsonPath.FromProperty("score");
+        decimal minimumDecimal = 7.5m;
+        string datePath = DynamicJsonPath.FromProperty("debutDate");
+        DateOnly minimumDate = new(2024, 6, 14);
+
+        string textSql = context.Records
+            .Where(record => DynamicJsonFunctions.Value(record.Values, textPath) == expectedText)
+            .ToQueryString();
+        string decimalSql = context.Records
+            .Where(record => DynamicJsonFunctions.ValueDecimal(record.Values, decimalPath) >= minimumDecimal)
+            .ToQueryString();
+        string dateSql = context.Records
+            .Where(record => DynamicJsonFunctions.ValueDate(record.Values, datePath) >= minimumDate)
+            .ToQueryString();
+
+        AssertCapturedParameters(textSql, "=");
+        AssertCapturedParameters(decimalSql, ">=");
+        AssertCapturedParameters(dateSql, ">=");
+    }
+
     [Theory]
     [InlineData("$.items[0]")]
     [InlineData("$.*")]
@@ -117,6 +143,14 @@ public sealed class PostgreSqlJsonTranslationTests
             Expression.Lambda<Func<TestJsonRecord, bool>>(predicate, record);
 
         return context.Records.Where(lambda);
+    }
+
+    private static void AssertCapturedParameters(string sql, string comparisonOperator)
+    {
+        sql.Should().MatchRegex(
+            @"jsonb_path_query_first\([^,]+, @[A-Za-z0-9_]+::jsonpath\)");
+        sql.Should().MatchRegex(
+            $@"{System.Text.RegularExpressions.Regex.Escape(comparisonOperator)} @[A-Za-z0-9_]+");
     }
 
     private static TestJsonDbContext CreateContext(bool registerDynamicJson = true)
