@@ -237,9 +237,14 @@ flowchart TB
 
 - **Dynamic.Json.EfCore.PostgreSql** maps `JsonObject` values to native `jsonb` columns and translates provider-neutral marker functions with PostgreSQL JSON path and conversion expressions.
 
-See [Scalar provider architecture](docs/scalar-provider-architecture.md) for the core/provider responsibility contract and the extension steps for new scalar providers.
-See [Portable scalar JSON path contract](docs/scalar-json-path-contract.md) for supported property paths, escaping, and unsupported syntax.
-See [Security](docs/security.md) for standing requirements, release gates, and dated security reviews.
+## Documentation
+
+- [Scalar provider architecture](docs/scalar-provider-architecture.md) — core/provider responsibilities and the extension process for database providers.
+- [Portable scalar JSON path contract](docs/scalar-json-path-contract.md) — supported property paths, escaping rules, and rejected syntax.
+- [Scalar null and conversion contract](docs/scalar-null-conversion-contract.md) — cross-provider behavior for missing, null, valid, and invalid scalar values.
+- [Collection query architecture notes](docs/collection-query-architecture-notes.md) — design boundaries and productization requirements for future collection queries.
+- [Security](docs/security.md) — standing security requirements, release gates, and dated security reviews.
+- [Test coverage](docs/test-coverage.md) — current validation inventory and coverage expectations.
 
 ## Repository Layout
 
