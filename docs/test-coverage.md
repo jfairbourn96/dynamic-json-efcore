@@ -4,11 +4,11 @@ This checklist tracks meaningful test coverage for the `Dynamic.Json.EfCore.*` p
 
 ## Current Test Status
 
-Last verified with:
+Last verified on July 27, 2026 with:
 
 ```text
-dotnet test Dynamic.Json.EfCore.slnx --no-restore
-Passed: 67, Failed: 0, Skipped: 0
+Dynamic.Json.EfCore.UnitTests: Passed: 108, Failed: 0, Skipped: 0
+Dynamic.Json.EfCore.IntegrationTests: Passed: 39, Failed: 0, Skipped: 0
 ```
 
 Coverage collection:
@@ -24,7 +24,9 @@ Line coverage: 96.19%
 Branch coverage: 87.50%
 ```
 
-The default coverage report excludes test assemblies and the SQL Server integration project. Integration tests run in a separate CI job because they require Docker/Testcontainers and a real SQL Server container.
+The default coverage report excludes test assemblies and the provider integration project.
+Integration tests run in a separate CI job because they require Docker/Testcontainers with real
+SQL Server 2022 and PostgreSQL 18 containers.
 
 ## Coverage Matrix
 

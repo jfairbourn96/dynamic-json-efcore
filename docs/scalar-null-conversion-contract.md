@@ -29,4 +29,17 @@ The SQL Server provider implements missing, JSON-null, and database-null behavio
 `JSON_VALUE`. Decimal and date conversions use `TRY_CONVERT`, which returns SQL `NULL` instead of
 raising an error for invalid input. These are the existing SQL Server semantics and remain unchanged.
 
+## PostgreSQL implementation
+
+The PostgreSQL provider extracts scalar text with `jsonb_path_query_first` followed by text
+traversal. Missing properties, JSON `null`, and database-null JSON documents therefore produce SQL
+`NULL`.
+
+Decimal and date conversions call `pg_input_is_valid` before casting to PostgreSQL `numeric` or
+`date`. A failed validity check produces SQL `NULL` instead of evaluating the cast. Accepted input
+formats follow PostgreSQL's native input rules rather than a library-defined parser.
+
+This implementation requires PostgreSQL 16 or later. PostgreSQL integration coverage currently
+targets PostgreSQL 18.
+
 Collection elements and application-level validation are outside this contract.
