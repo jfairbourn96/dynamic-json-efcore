@@ -83,14 +83,6 @@ public sealed class PostgreSqlRegistrationTests
         sqlServerPlugins.Should().Equal(typeof(DynamicJsonSqlServerMethodCallTranslatorPlugin));
     }
 
-    [Fact]
-    public void TranslatorPlugin_BeforeFunctionTranslationStories_HasNoTranslators()
-    {
-        DynamicJsonPostgreSqlMethodCallTranslatorPlugin plugin = new();
-
-        plugin.Translators.Should().BeEmpty();
-    }
-
     private static IDbContextOptionsExtension GetDynamicJsonExtension(DbContextOptions options)
         => options.Extensions.Single(IsDynamicJsonExtension);
 

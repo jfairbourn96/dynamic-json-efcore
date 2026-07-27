@@ -1,17 +1,27 @@
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.EntityFrameworkCore.Storage;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Query;
 
 namespace Dynamic.Json.EfCore.PostgreSql;
 
 /// <summary>
 /// PostgreSQL method-call translator plugin for Dynamic.Json.EfCore query functions.
 /// </summary>
-/// <remarks>
-/// Individual scalar translators are added by their respective translation stories. Keeping the
-/// plugin registered before those translators exist establishes the provider service boundary
-/// without introducing function behavior prematurely.
-/// </remarks>
 public sealed class DynamicJsonPostgreSqlMethodCallTranslatorPlugin : IMethodCallTranslatorPlugin
 {
+    /// <summary>Initializes the plugin with PostgreSQL scalar JSON translations.</summary>
+    public DynamicJsonPostgreSqlMethodCallTranslatorPlugin(
+        ISqlExpressionFactory sqlExpressionFactory,
+        IRelationalTypeMappingSource typeMappingSource)
+    {
+        Translators =
+        [
+            new DynamicJsonPostgreSqlFunctionsTranslator(
+                (NpgsqlSqlExpressionFactory)sqlExpressionFactory,
+                typeMappingSource)
+        ];
+    }
+
     /// <inheritdoc />
-    public IEnumerable<IMethodCallTranslator> Translators { get; } = [];
+    public IEnumerable<IMethodCallTranslator> Translators { get; }
 }

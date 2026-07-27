@@ -2,6 +2,7 @@ using System.Data.Common;
 using System.Text.Json.Nodes;
 using Dynamic.Json.EfCore.Metadata;
 using Dynamic.Json.EfCore.PostgreSql;
+using Dynamic.Json.EfCore.Querying;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -68,6 +69,69 @@ public sealed class PostgreSqlJsonObjectIntegrationTests
         populated.Values["metadata"]!["group"]!.GetValue<string>().Should().Be("Huntrix");
         records.Single(record => record.Id == emptyId).Values.Should().BeEmpty();
         records.Single(record => record.Id == nullId).Values.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ScalarQueries_HandleValidMissingNullDatabaseNullAndInvalidValues()
+    {
+        DateOnly threshold = new(2020, 1, 1);
+        Guid validId = Guid.NewGuid();
+        string validName = $"Rumi-{validId}";
+        Guid missingId = Guid.NewGuid();
+        Guid jsonNullId = Guid.NewGuid();
+        Guid databaseNullId = Guid.NewGuid();
+        Guid invalidId = Guid.NewGuid();
+        Guid[] testIds = [validId, missingId, jsonNullId, databaseNullId, invalidId];
+
+        await using (TestJsonDbContext context = CreateContext())
+        {
+            await context.Database.EnsureCreatedAsync();
+            context.Records.AddRange(
+                new TestJsonRecord
+                {
+                    Id = validId,
+                    Values = new JsonObject { ["name"] = validName, ["score"] = "12.50", ["day"] = "2024-06-14" }
+                },
+                new TestJsonRecord { Id = missingId, Values = new JsonObject() },
+                new TestJsonRecord
+                {
+                    Id = jsonNullId,
+                    Values = new JsonObject { ["name"] = null, ["score"] = null, ["day"] = null }
+                },
+                new TestJsonRecord { Id = databaseNullId, Values = null! },
+                new TestJsonRecord
+                {
+                    Id = invalidId,
+                    Values = new JsonObject { ["score"] = "not-a-number", ["day"] = "not-a-date" }
+                });
+            await context.SaveChangesAsync();
+        }
+
+        await using TestJsonDbContext queryContext = CreateContext();
+        (await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
+                DynamicJsonFunctions.Value(record.Values, "$.name") == validName)
+            .Select(record => record.Id).ToArrayAsync()).Should().Equal(validId);
+        (await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
+                DynamicJsonFunctions.ValueDecimal(record.Values, "$.score") >= 12m)
+            .Select(record => record.Id).ToArrayAsync()).Should().Equal(validId);
+        (await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
+                DynamicJsonFunctions.ValueDate(record.Values, "$.day") >= threshold)
+            .Select(record => record.Id).ToArrayAsync()).Should().Equal(validId);
+
+        Guid[] nullTextIds = await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
+                DynamicJsonFunctions.Value(record.Values, "$.name") == null)
+            .Select(record => record.Id).ToArrayAsync();
+        nullTextIds.Should().BeEquivalentTo([missingId, jsonNullId, databaseNullId, invalidId]);
+
+        Guid[] nullDecimalIds = await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
+                DynamicJsonFunctions.ValueDecimal(record.Values, "$.score") == null)
+            .Select(record => record.Id).ToArrayAsync();
+        nullDecimalIds.Should().BeEquivalentTo([missingId, jsonNullId, databaseNullId, invalidId]);
+
+        Guid[] nullDateIds = await queryContext.Records.Where(record => testIds.Contains(record.Id) &&
+                DynamicJsonFunctions.ValueDate(record.Values, "$.day") == null)
+            .Select(record => record.Id).ToArrayAsync();
+        nullDateIds.Should().BeEquivalentTo([missingId, jsonNullId, databaseNullId, invalidId]);
     }
 
     private TestJsonDbContext CreateContext()

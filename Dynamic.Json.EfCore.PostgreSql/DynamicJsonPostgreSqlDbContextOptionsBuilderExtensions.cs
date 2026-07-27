@@ -14,8 +14,8 @@ public static class DynamicJsonPostgreSqlDbContextOptionsBuilderExtensions
     /// <param name="builder">The EF Core options builder to configure.</param>
     /// <returns>The same options builder so configuration calls can be chained.</returns>
     /// <remarks>
-    /// This registration establishes the PostgreSQL provider boundary and adds its translator
-    /// plugin to EF Core. Individual scalar translations are introduced separately.
+    /// This registration establishes the PostgreSQL provider boundary and adds its scalar JSON
+    /// translator plugin to EF Core.
     /// </remarks>
     public static DbContextOptionsBuilder UseDynamicJsonPostgreSql(this DbContextOptionsBuilder builder)
     {
