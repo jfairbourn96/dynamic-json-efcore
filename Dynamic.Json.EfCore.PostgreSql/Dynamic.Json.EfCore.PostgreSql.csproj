@@ -7,6 +7,7 @@
         <PackageId>Dynamic.Json.EfCore.PostgreSql</PackageId>
         <Title>Dynamic.Json.EfCore PostgreSQL Provider</Title>
         <Description>PostgreSQL and Npgsql support for mapping, tracking, and querying Dynamic.Json.EfCore JSON fields with native jsonb storage.</Description>
+        <PackageReleaseNotes>Preview release adding PostgreSQL 16+ jsonb persistence and server-side Value, ValueDecimal, and ValueDate translation through Npgsql and EF Core 10.</PackageReleaseNotes>
         <PackageTags>ef-core;json;dynamic-fields;querying;postgresql;npgsql</PackageTags>
     </PropertyGroup>
 

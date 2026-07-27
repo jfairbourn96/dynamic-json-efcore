@@ -80,6 +80,52 @@ public sealed class PostgreSqlPackageMetadataTests(
         package.Metadata.Element(Nuspec + "description")!.Value
             .Should().ContainAll("PostgreSQL", "Npgsql", "jsonb");
     }
+
+    [Fact]
+    public void Package_UsesAlignedPreviewVersionAndReleaseNotes()
+    {
+        var version = package.Metadata.Element(Nuspec + "version")!.Value;
+        var coreDependencyVersion = package.Metadata
+            .Descendants(Nuspec + "dependency")
+            .Single(dependency => (string?)dependency.Attribute("id") == "Dynamic.Json.EfCore")
+            .Attribute("version")!.Value;
+
+        version.Should().Be("0.2.1-preview.1");
+        coreDependencyVersion.Should().Contain(version);
+        package.Metadata.Element(Nuspec + "releaseNotes")!.Value
+            .Should().ContainAll(
+                "Preview",
+                "PostgreSQL 16+",
+                "Value",
+                "ValueDecimal",
+                "ValueDate");
+    }
+
+    [Fact]
+    public void Package_ContainsRuntimeAndDocumentationArtifacts()
+    {
+        package.Entries.Should().Contain(
+            "lib/net10.0/Dynamic.Json.EfCore.PostgreSql.dll",
+            "lib/net10.0/Dynamic.Json.EfCore.PostgreSql.xml",
+            "README.md");
+    }
+
+    [Fact]
+    public void PackageReadme_DocumentsSetupCompatibilityAndScalarUsage()
+    {
+        package.Readme.Should().ContainAll(
+            "dotnet add package Dynamic.Json.EfCore.PostgreSql",
+            "UseDynamicJsonPostgreSql",
+            "HasColumnType(\"jsonb\")",
+            "Value",
+            "ValueDecimal",
+            "ValueDate",
+            "PostgreSQL 16",
+            "Npgsql",
+            "jsonb_path_query_first",
+            "nvarchar(max)",
+            "JSON_VALUE");
+    }
 }
 
 /// <summary>
@@ -133,6 +179,12 @@ public sealed class PostgreSqlPackageFixture : IDisposable
 
         using var archive = ZipFile.OpenRead(packagePath);
         Entries = archive.Entries.Select(entry => entry.FullName).ToArray();
+        var readmeEntry = archive.Entries.Single(entry => entry.FullName == "README.md");
+        using (var readmeReader = new StreamReader(readmeEntry.Open()))
+        {
+            Readme = readmeReader.ReadToEnd();
+        }
+
         var nuspecEntry = archive.Entries.Single(entry => entry.FullName.EndsWith(".nuspec"));
         using var nuspecStream = nuspecEntry.Open();
         Metadata = XDocument.Load(nuspecStream).Root!.Element(Nuspec + "metadata")!;
@@ -141,6 +193,8 @@ public sealed class PostgreSqlPackageFixture : IDisposable
     public XElement Metadata { get; }
 
     public IReadOnlyCollection<string> Entries { get; }
+
+    public string Readme { get; }
 
     public void Dispose()
     {

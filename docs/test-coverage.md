@@ -7,7 +7,7 @@ This checklist tracks meaningful test coverage for the `Dynamic.Json.EfCore.*` p
 Last verified on July 27, 2026 with:
 
 ```text
-Dynamic.Json.EfCore.UnitTests: Passed: 108, Failed: 0, Skipped: 0
+Dynamic.Json.EfCore.UnitTests: Passed: 111, Failed: 0, Skipped: 0
 Dynamic.Json.EfCore.IntegrationTests: Passed: 44, Failed: 0, Skipped: 0
 ```
 
@@ -42,7 +42,7 @@ SQL Server 2022 and PostgreSQL 18 containers.
 | `Dynamic.Json.EfCore.AspNetCore` | Dynamic search query parsing | Covered | Happy paths, select fields, invalid operators, invalid values, unknown fields, ignored parameters, mixed valid/invalid input, multiple errors. |
 | `Dynamic.Json.EfCore.AspNetCore` | Parser service registration | Covered | `AddDynamicJsonEfCoreAspNetCore()` resolves `IDynamicSearchQueryParser`. |
 | `Dynamic.Json.EfCore.PostgreSql` | Provider registration boundary | Covered | Docker-free tests verify options metadata, idempotent `UseDynamicJsonPostgreSql()` registration, Npgsql composition, scoped translator-plugin lifetime, and isolation from SQL Server registration. |
-| `Dynamic.Json.EfCore.PostgreSql` | NuGet package contract | Covered | Package tests inspect the produced `.nupkg` to verify PostgreSQL metadata, native `jsonb` description, bundled readme, core dependency, and bounded EF Core/Npgsql 10.x compatibility. |
+| `Dynamic.Json.EfCore.PostgreSql` | NuGet package contract | Covered | Package tests inspect the produced `.nupkg` to verify aligned preview versioning, release notes, PostgreSQL metadata, native `jsonb` description, bounded EF Core/Npgsql 10.x dependencies, bundled consumer guidance, and runtime/XML documentation artifacts. |
 | `Dynamic.Json.EfCore.PostgreSql` | `jsonb` persistence | Integration covered | PostgreSQL Testcontainers coverage verifies the physical `jsonb` column and raw storage, then materializes populated, empty, and database-null `JsonObject` values through a fresh no-tracking context. |
 | `Dynamic.Json.EfCore.PostgreSql` | Scalar JSON translation | Covered | Docker-free SQL tests verify text, safe decimal/date conversion, portable constant paths, captured path and comparison parameters, registration requirements, and unsupported-path rejection. PostgreSQL Testcontainers coverage verifies valid values plus missing, JSON-null, database-null, and invalid conversion results. |
 | Cross-provider | Shared scalar provider contracts | Integration covered | One inherited contract suite runs against PostgreSQL 18 and SQL Server 2022, verifying physical JSON storage, populated/empty/database-null round trips, text/decimal/date execution, and portable missing/null/invalid results. |
