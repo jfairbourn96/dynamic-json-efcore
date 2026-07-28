@@ -71,7 +71,7 @@ END
 
 | Package or runtime | Supported version |
 | --- | --- |
-| Dynamic.Json.EfCore.PostgreSql | `0.2.1-preview.1` |
+| Dynamic.Json.EfCore.PostgreSql | `0.3.0-preview.1` |
 | .NET | 10 |
 | EF Core relational | `>= 10.0.9` and `< 11.0.0` |
 | Npgsql EF Core provider | `>= 10.0.3` and `< 11.0.0` |

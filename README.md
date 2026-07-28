@@ -104,7 +104,7 @@ dotnet add package Dynamic.Json.AspNetCore
 | `Dynamic.Json.EfCore.PostgreSql` | PostgreSQL `jsonb` persistence and scalar string, decimal, and date query translation. |
 | [`Dynamic.Json.AspNetCore`](https://www.nuget.org/packages/Dynamic.Json.AspNetCore) | ASP.NET Core query-string adapters and service registration for dynamic search parsing. |
 
-The current package version is `0.2.1-preview.1` and targets `.NET 10`.
+The current package version is `0.3.0-preview.1` and targets `.NET 10`.
 
 ### PostgreSQL provider
 

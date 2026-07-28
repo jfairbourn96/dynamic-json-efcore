@@ -90,7 +90,7 @@ public sealed class PostgreSqlPackageMetadataTests(
             .Single(dependency => (string?)dependency.Attribute("id") == "Dynamic.Json.EfCore")
             .Attribute("version")!.Value;
 
-        version.Should().Be("0.2.1-preview.1");
+        version.Should().Be("0.3.0-preview.1");
         coreDependencyVersion.Should().Contain(version);
         package.Metadata.Element(Nuspec + "releaseNotes")!.Value
             .Should().ContainAll(

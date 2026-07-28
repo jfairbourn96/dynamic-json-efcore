@@ -1,6 +1,6 @@
 # PostgreSQL Preview Release Notes
 
-## 0.2.1-preview.1
+## 0.3.0-preview.1
 
 This preview introduces the `Dynamic.Json.EfCore.PostgreSql` package for PostgreSQL 16+, Npgsql, and EF Core 10.
 
