@@ -104,7 +104,33 @@ dotnet add package Dynamic.Json.AspNetCore
 | `Dynamic.Json.EfCore.PostgreSql` | PostgreSQL `jsonb` persistence and scalar string, decimal, and date query translation. |
 | [`Dynamic.Json.AspNetCore`](https://www.nuget.org/packages/Dynamic.Json.AspNetCore) | ASP.NET Core query-string adapters and service registration for dynamic search parsing. |
 
-The current package version is `0.2.1-preview.1` and targets `.NET 10`.
+The current package version is `0.3.0-preview.1` and targets `.NET 10`.
+
+### PostgreSQL provider
+
+Register the PostgreSQL translators on the same options builder used for Npgsql:
+
+```csharp
+services.AddDbContext<AppDbContext>(options =>
+    options
+        .UseNpgsql(connectionString)
+        .UseDynamicJsonPostgreSql());
+```
+
+Map the dynamic JSON property to PostgreSQL `jsonb`:
+
+```csharp
+modelBuilder.Entity<Employee>()
+    .Property(employee => employee.FieldValues)
+    .HasColumnType("jsonb")
+    .HasJsonConversion();
+```
+
+The provider supports server-side `DynamicJsonFunctions.Value`, `ValueDecimal`, and `ValueDate` queries through the same provider-neutral API used by SQL Server. It targets EF Core `>= 10.0.9` and `< 11.0.0`, Npgsql `>= 10.0.3` and `< 11.0.0`, and PostgreSQL 16 or later; integration tests currently run against PostgreSQL 18.
+
+Generated PostgreSQL SQL uses `jsonb_path_query_first`; guarded decimal and date conversions use `pg_input_is_valid`. PostgreSQL stores native `jsonb`, while SQL Server stores JSON text in `nvarchar(max)` and extracts scalars with `JSON_VALUE`. Both providers preserve the same path, missing-value, JSON-null, and safe-conversion contract.
+
+See the [PostgreSQL provider guide](docs/postgresql-provider.md) for installation, scalar query examples, generated SQL illustrations, compatibility policy, and provider differences.
 
 ## Quick Start
 
@@ -239,6 +265,8 @@ flowchart TB
 
 ## Documentation
 
+- [PostgreSQL provider guide](docs/postgresql-provider.md) — installation, registration, scalar queries, compatibility, and cross-provider behavior.
+- [PostgreSQL preview release notes](docs/postgresql-preview-release-notes.md) — preview contents, validation, and limitations.
 - [Scalar provider architecture](docs/scalar-provider-architecture.md) — core/provider responsibilities and the extension process for database providers.
 - [Portable scalar JSON path contract](docs/scalar-json-path-contract.md) — supported property paths, escaping rules, and rejected syntax.
 - [Scalar null and conversion contract](docs/scalar-null-conversion-contract.md) — cross-provider behavior for missing, null, valid, and invalid scalar values.
